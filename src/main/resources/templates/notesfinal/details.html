@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Détails du Calcul</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #27ae60;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #27ae60;
+            margin: 30px 0 15px 0;
+            font-size: 20px;
+        }
+        .info-header {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .info-header h3 {
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .detail-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #27ae60;
+        }
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .detail-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #27ae60;
+            color: white;
+            font-weight: 600;
+        }
+        tr:hover {
+            background: #f5f7fa;
+        }
+        .regle-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .regle-box.success {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        .regle-box.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+        .regle-box h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        .regle-box.success h3 {
+            color: #155724;
+        }
+        .regle-box.error h3 {
+            color: #721c24;
+        }
+        .regle-detail {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.8;
+        }
+        .regle-detail strong {
+            color: #27ae60;
+        }
+        .validation-box {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+        }
+        .validation-success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        .validation-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #229954;
+        }
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            margin: 20px 0;
+        }
+        .differences-list {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .differences-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        .differences-list li {
+            padding: 5px 0;
+            font-size: 14px;
+        }
+        .formula {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Détails du Calcul de la Note Finale</h1>
+        
+        <div th:if="${error}" class="error-message">
+            <h3>❌ Erreur</h3>
+            <p th:text="${error}"></p>
+        </div>
+        
+        <div th:if="${details != null}">
+            <div class="info-header">
+                <h3>👨‍🎓 <span th:text="${etudiant.nom}"></span></h3>
+                <h3>📖 <span th:text="${matiere.name}"></span></h3>
+            </div>
+            
+            <h2>📝 Notes des Professeurs</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Professeur</th>
+                        <th>Note</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="note : ${details.notes}">
+                        <td th:text="${note.professeur.name}"></td>
+                        <td th:text="${note.valeur} + ' / 20'"></td>
+                        <td th:text="${#temporals.format(note.dateHeure, 'dd/MM/yyyy HH:mm')}"></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h2>📊 Statistiques des Notes</h2>
+            <div class="detail-grid">
+                <div class="detail-box">
+                    <div class="detail-label">Note Minimale</div>
+                    <div class="detail-value" th:text="${#numbers.formatDecimal(details.min, 1, 2)}"></div>
+                </div>
+                <div class="detail-box">
+                    <div class="detail-label">Note Maximale</div>
+                    <div class="detail-value" th:text="${#numbers.formatDecimal(details.max, 1, 2)}"></div>
+                </div>
+                <div class="detail-box">
+                    <div class="detail-label">Moyenne</div>
+                    <div class="detail-value" th:text="${#numbers.formatDecimal(details.moyenne, 1, 2)}"></div>
+                </div>
+            </div>
+            
+            <h2>📏 Différences entre les Notes</h2>
+            <div class="detail-grid">
+                <div class="detail-box">
+                    <div class="detail-label">Écart Minimum</div>
+                    <div class="detail-value" th:text="${#numbers.formatDecimal(details.ecartMin, 1, 2)}"></div>
+                </div>
+                <div class="detail-box">
+                    <div class="detail-label">Écart Maximum</div>
+                    <div class="detail-value" th:text="${#numbers.formatDecimal(details.ecartMax, 1, 2)}"></div>
+                </div>
+                <div class="detail-box">
+                    <div class="detail-label">Écart Moyen</div>
+                    <div class="detail-value" th:text="${#numbers.formatDecimal(details.ecartMoyen, 1, 2)}"></div>
+                </div>
+            </div>
+            
+            <div class="differences-list">
+                <strong>💡 Toutes les différences calculées :</strong>
+                <ul>
+                    <li th:each="diff, iterStat : ${details.differences}">
+                        Différence <span th:text="${iterStat.index + 1}"></span> : 
+                        <strong th:text="${#numbers.formatDecimal(diff, 1, 2)}"></strong> points
+                    </li>
+                </ul>
+            </div>
+            
+                    <!-- Section des règles dans details.html -->
+        <h2>⚙️ Vérification des Règles (Système en 2 Étapes)</h2>
+
+        <div class="info-box" style="background: #e3f2fd; padding: 15px; margin: 20px 0; border-left: 4px solid #2196f3;">
+            <strong>📘 Comment ça marche ?</strong>
+            <ol style="margin: 10px 0 0 20px;">
+                <li><strong>Étape 1 :</strong> Vérifier RÉSOLUTION(différences) COMPARATEUR seuil</li>
+                <li><strong>Étape 2 :</strong> Si respectée → Prendre RÉSOLUTION(notes) comme note candidate</li>
+                <li><strong>Étape 3 :</strong> Note finale = Moyenne des notes candidates</li>
+            </ol>
+        </div>
+
+        <div th:each="validation : ${details.validationsParametres}">
+            <div th:class="${validation.respecte} ? 'regle-box success' : 'regle-box error'">
+                <h3>
+                    Règle <span th:text="${validation.parametre.id}"></span>
+                    <span th:if="${validation.respecte}" style="float: right;">✅ RESPECTÉE</span>
+                    <span th:unless="${validation.respecte}" style="float: right;">❌ NON RESPECTÉE</span>
+                </h3>
+                <div class="regle-detail">
+                    <div style="background: #fff; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                        <p><strong>📋 Configuration :</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Résolution :</strong> <span th:text="${validation.parametre.resolution.ref}"></span></li>
+                            <li><strong>Comparateur :</strong> <span th:text="${validation.symbole}"></span></li>
+                            <li><strong>Seuil :</strong> <span th:text="${validation.parametre.seuil}"></span></li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #fffde7; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                        <p><strong>🔍 ÉTAPE 1 : Vérification sur les DIFFÉRENCES</strong></p>
+                        <div class="formula">
+                            <span th:text="${validation.parametre.resolution.ref}"></span>(différences)
+                            <span th:text="${validation.symbole}"></span>
+                            <span th:text="${validation.parametre.seuil}"></span>
+                            <br>
+                            <span style="font-size: 18px; color: #f57c00;">
+                                <span th:text="${#numbers.formatDecimal(validation.valeurDifference, 1, 2)}"></span>
+                                <span th:text="${validation.symbole}"></span>
+                                <span th:text="${validation.parametre.seuil}"></span>
+                                = 
+                                <strong th:if="${validation.respecte}" style="color: #4caf50;">VRAI ✅</strong>
+                                <strong th:unless="${validation.respecte}" style="color: #f44336;">FAUX ❌</strong>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${validation.respecte}" style="background: #e8f5e9; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                        <p><strong>✅ ÉTAPE 2 : Note Candidate</strong></p>
+                        <div style="font-size: 18px; color: #2e7d32; margin-top: 10px;">
+                            → <span th:text="${validation.parametre.resolution.ref}"></span>(notes) = 
+                            <strong style="font-size: 24px;">
+                                <span th:text="${#numbers.formatDecimal(validation.noteCandidate, 1, 2)}"></span> / 20
+                            </strong>
+                        </div>
+                    </div>
+                    
+                            <div th:unless="${validation.respecte}" style="background: #ffebee; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                                <p style="color: #c62828;"><strong>❌ Règle non respectée</strong> → Pas de note candidate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+        <h2>🎯 Calcul de la Note Finale</h2>
+
+        <div th:if="${details.notesCandidates != null && !details.notesCandidates.isEmpty()}" class="candidates-box">
+            <strong>📊 Notes candidates (règles respectées) :</strong>
+            <ul>
+                <li th:each="candidate, iterStat : ${details.notesCandidates}" style="font-size: 18px; color: #1976d2;">
+                    Candidate <span th:text="${iterStat.index + 1}"></span> : 
+                    <strong th:text="${#numbers.formatDecimal(candidate, 1, 2)}"></strong> / 20
+                </li>
+            </ul>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #fff; border-radius: 5px;">
+                <strong>🧮 Calcul :</strong>
+                <div class="formula" style="font-size: 16px; margin-top: 10px;">
+                    Note finale = Moyenne des notes candidates<br>
+                    = (<span th:text="${#strings.listJoin(details.notesCandidates, ' + ')}"></span>) 
+                    / <span th:text="${#lists.size(details.notesCandidates)}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${details.noteFinalCalculee != null}" class="final-note-box">
+            <h2>🏆 NOTE FINALE VALIDÉE</h2>
+            <div class="final-note-value" th:text="${#numbers.formatDecimal(details.noteFinalCalculee, 1, 2)} + ' / 20'"></div>
+        </div>
+            
+            <div class="actions">
+                <a th:if="${details.respecteRegle}" 
+                   href="/notes-final/calculer" 
+                   class="btn btn-success"
+                   th:onclick="'this.href=\'/notes-final/calculer?etudiantId=\' + ' + ${etudiant.id} + ' + \'&matiereId=\' + ' + ${matiere.id}">
+                    💾 Enregistrer la Note Finale
+                </a>
+                <a href="/notes-final" class="btn btn-secondary">⬅️ Retour</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des Matières</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #764ba2;
+            padding-bottom: 10px;
+        }
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #764ba2;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5f3c85;
+        }
+        .btn-warning {
+            background: #f6b93b;
+            color: white;
+        }
+        .btn-warning:hover {
+            background: #e1a32a;
+        }
+        .btn-danger {
+            background: #e55039;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #d63a28;
+        }
+        .btn-info {
+            background: #4a90e2;
+            color: white;
+        }
+        .btn-info:hover {
+            background: #3a7bc8;
+        }
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #764ba2;
+            color: white;
+            font-weight: 600;
+        }
+        tr:hover {
+            background: #f5f7fa;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📖 Liste des Matières</h1>
+        
+        <div class="header-actions">
+            <a href="/matieres/new" class="btn btn-primary">➕ Nouvelle Matière</a>
+            <a href="/" class="btn btn-secondary">🏠 Accueil</a>
+        </div>
+        
+        <table th:if="${matieres != null && !matieres.isEmpty()}">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom de la Matière</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="matiere : ${matieres}">
+                    <td th:text="${matiere.id}"></td>
+                    <td th:text="${matiere.name}"></td>
+                    <td class="actions">
+                        <a th:href="@{/matieres/{id}(id=${matiere.id})}" class="btn btn-info">👁️ Voir</a>
+                        <a th:href="@{/matieres/{id}/edit(id=${matiere.id})}" class="btn btn-warning">✏️ Modifier</a>
+                        <a th:href="@{/matieres/{id}/delete(id=${matiere.id})}" 
+                           class="btn btn-danger"
+                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette matière ?')">🗑️ Supprimer</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="no-data" th:if="${matieres == null || matieres.isEmpty()}">
+            <p>Aucune matière enregistrée</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Détails Étudiant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .detail-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        .detail-value {
+            color: #333;
+            font-size: 16px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .btn-warning {
+            background: #f6b93b;
+            color: white;
+        }
+        .btn-warning:hover {
+            background: #e1a32a;
+        }
+        .btn-danger {
+            background: #e55039;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #d63a28;
+        }
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👨‍🎓 Détails de l'Étudiant</h1>
+        
+        <div th:if="${etudiant != null}">
+            <div class="detail-group">
+                <div class="detail-label">ID</div>
+                <div class="detail-value" th:text="${etudiant.id}"></div>
+            </div>
+            
+            <div class="detail-group">
+                <div class="detail-label">Nom</div>
+                <div class="detail-value" th:text="${etudiant.nom}"></div>
+            </div>
+            
+            <div class="detail-group">
+                <div class="detail-label">Date de Naissance</div>
+                <div class="detail-value" th:text="${etudiant.dateNaissance}"></div>
+            </div>
+            
+            <div class="detail-group">
+                <div class="detail-label">Établissement d'Origine</div>
+                <div class="detail-value" th:text="${etudiant.etablissementOrigine}"></div>
+            </div>
+            
+            <div class="actions">
+                <a th:href="@{/etudiants/{id}/edit(id=${etudiant.id})}" class="btn btn-warning">✏️ Modifier</a>
+                <a th:href="@{/etudiants/{id}/delete(id=${etudiant.id})}" 
+                   class="btn btn-danger"
+                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet étudiant ?')">🗑️ Supprimer</a>
+                <a href="/etudiants" class="btn btn-secondary">⬅️ Retour à la liste</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
