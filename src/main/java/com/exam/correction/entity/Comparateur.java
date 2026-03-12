@@ -21,7 +21,41 @@ public class Comparateur {
     private TypeComparateur ref;
     
     public enum TypeComparateur {
-        INFERIEUR, // <
-        SUPERIEUR  // >
+        INFERIEUR,              // < (inférieur à)
+        SUPERIEUR,              // > (supérieur à)
+        INFERIEUR_OU_EGAL,      // <= (inférieur ou égal à)
+        SUPERIEUR_OU_EGAL       // >= (supérieur ou égal à)
+    }
+    
+    // Méthode utilitaire pour obtenir le symbole
+    public String getSymbole() {
+        switch (ref) {
+            case INFERIEUR:
+                return "<";
+            case SUPERIEUR:
+                return ">";
+            case INFERIEUR_OU_EGAL:
+                return "<=";
+            case SUPERIEUR_OU_EGAL:
+                return ">=";
+            default:
+                return "";
+        }
+    }
+    
+    // Méthode utilitaire pour obtenir la description
+    public String getDescription() {
+        switch (ref) {
+            case INFERIEUR:
+                return "Inférieur à";
+            case SUPERIEUR:
+                return "Supérieur à";
+            case INFERIEUR_OU_EGAL:
+                return "Inférieur ou égal à";
+            case SUPERIEUR_OU_EGAL:
+                return "Supérieur ou égal à";
+            default:
+                return "";
+        }
     }
 }
