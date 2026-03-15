@@ -1,16 +1,13 @@
--- ================================================
--- CRÉATION DE LA BASE DE DONNÉES
--- ================================================
 
-DROP DATABASE IF EXISTS exam_correction;
-CREATE DATABASE exam_correction CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE exam_correction;
+-- Suppression et création de la base
+DROP DATABASE IF EXISTS Exam_correcte;
+CREATE DATABASE Exam_correcte CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE Exam_correcte;
 
 -- ================================================
 -- CRÉATION DES TABLES
 -- ================================================
 
--- Table Etudiant
 CREATE TABLE etudiant (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
@@ -20,7 +17,6 @@ CREATE TABLE etudiant (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Table Matiere
 CREATE TABLE matiere (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
@@ -28,7 +24,6 @@ CREATE TABLE matiere (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Table Professeur
 CREATE TABLE professeur (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -38,7 +33,6 @@ CREATE TABLE professeur (
     FOREIGN KEY (id_matiere) REFERENCES matiere(id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Table Resolution
 CREATE TABLE resolution (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     ref VARCHAR(50) NOT NULL,
@@ -46,14 +40,13 @@ CREATE TABLE resolution (
     CONSTRAINT chk_resolution CHECK (ref IN ('MIN', 'MAX', 'AVERAGE'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Table Comparateur
 CREATE TABLE comparateur (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     ref VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_comparateur CHECK (ref IN ('INFERIEUR', 'SUPERIEUR', 'INFERIEUR_OU_EGAL', 'SUPERIEUR_OU_EGAL'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Table Notes
 CREATE TABLE notes (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     etudiant_id BIGINT NOT NULL,
@@ -71,7 +64,6 @@ CREATE TABLE notes (
     INDEX idx_date (date_heure)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Table Parametre
 CREATE TABLE parametre (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     matiere_id BIGINT NOT NULL,
@@ -86,7 +78,6 @@ CREATE TABLE parametre (
     INDEX idx_matiere (matiere_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Table NoteFinal
 CREATE TABLE note_final (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     matiere_id BIGINT NOT NULL,
