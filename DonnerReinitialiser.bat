@@ -19,27 +19,13 @@ if not exist "%MYSQL_PATH%" (
     exit /b 1
 )
 
-if not exist "%SQL_DIR%\supprimer_donnees.sql" (
-    echo [ERREUR] Fichier SQL non trouve : %SQL_DIR%\supprimer_donnees.sql
+if not exist "%SQL_DIR%\DonnerSuprimer.sql" (
+    echo [ERREUR] Fichier SQL non trouve : %SQL_DIR%\DonnerSuprimer.sql
     pause
     exit /b 1
 )
 
-echo ════════════════════════════════════════════════════════════════
-echo   ATTENTION : Cette operation va supprimer TOUTES les donnees
-echo   des tables suivantes :
-echo.
-echo   - Chemin_Vehicule
-echo   - Vehicule_pris
-echo   - Reservation
-echo   - Vehicule
-echo   - distance
-echo   - Configuration
-echo   - Hotel
-echo.
-echo   Les tables resteront intactes (structure conservee).
-echo ════════════════════════════════════════════════════════════════
-echo.
+
 
 set /p confirm="Etes-vous sur de vouloir continuer ? (O/N) : "
 
@@ -56,7 +42,7 @@ echo.
 echo Suppression des donnees en cours...
 echo.
 
-"%MYSQL_PATH%" -u root < "%SQL_DIR%\DonnerSupprimer.sql"
+"%MYSQL_PATH%" -u root < "%SQL_DIR%\DonnerSuprimer.sql"
 
 if %ERRORLEVEL% NEQ 0 (
     echo [ERREUR] Echec de la suppression

@@ -48,14 +48,6 @@ public class NoteFinalService {
         noteFinalRepository.deleteById(id);
     }
     
-    /**
-     * Calculer et enregistrer la note finale pour un étudiant dans une matière
-     * LOGIQUE COMPLÈTE :
-     * 1. Calculer les différences entre notes
-     * 2. Pour chaque règle : vérifier RÉSOLUTION(différences) COMPARATEUR seuil
-     * 3. Si respectée : ajouter RÉSOLUTION(notes) aux notes candidates
-     * 4. Note finale = moyenne des notes candidates
-     */
     @Transactional
     public NoteFinal calculerEtEnregistrerNoteFinal(Long etudiantId, Long matiereId) {
         List<Notes> notes = notesRepository.findByEtudiantIdAndMatiereId(etudiantId, matiereId);
@@ -74,7 +66,6 @@ public class NoteFinalService {
             throw new RuntimeException("Aucun paramètre défini pour cette matière");
         }
         
-        // Calculer la note finale selon les règles
         double noteFinalCalculee = calculerNoteFinalAvecRegles(notes, parametres);
         
         Parametre parametrePrincipal = parametres.get(0);
@@ -100,7 +91,7 @@ public class NoteFinalService {
     }
     
     /**
-     * Calculer la note finale avec le système à 2 étapes
+     * Calculer la note finale avec arrondi aux seuils
      */
     private double calculerNoteFinalAvecRegles(List<Notes> notes, List<Parametre> parametres) {
         List<Double> valeurs = notes.stream()
@@ -108,25 +99,32 @@ public class NoteFinalService {
             .sorted()
             .collect(Collectors.toList());
         
-        // Calculer statistiques des notes
         double minNotes = valeurs.stream().min(Double::compare).orElse(0.0);
         double maxNotes = valeurs.stream().max(Double::compare).orElse(0.0);
         double avgNotes = valeurs.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
         
-        // Calculer toutes les différences entre paires de notes
         List<Double> differences = calculerToutesDifferences(valeurs);
         
-        // Notes candidates basées sur les règles respectées
+        // Collecter tous les seuils pour l'arrondi
+        List<Double> seuils = parametres.stream()
+            .map(Parametre::getSeuil)
+            .distinct()
+            .sorted()
+            .collect(Collectors.toList());
+        
         List<Double> notesCandidates = new ArrayList<>();
         StringBuilder erreursRegles = new StringBuilder();
         
         for (Parametre parametre : parametres) {
-            // ÉTAPE 1 : Vérifier la règle sur les DIFFÉRENCES
             double valeurDifference = appliquerResolution(differences, parametre.getResolution());
-            boolean respecte = verifierCondition(valeurDifference, parametre);
+            
+            // NOUVELLE LOGIQUE : Arrondir aux seuils si entre deux seuils
+            double valeurArrondie = arrondirAuSeuilLePlusProche(valeurDifference, seuils);
+            
+            // Vérifier avec la valeur arrondie
+            boolean respecte = verifierCondition(valeurArrondie, parametre);
             
             if (respecte) {
-                // ÉTAPE 2 : Si respectée, ajouter RÉSOLUTION(notes) comme note candidate
                 double noteCandidate = appliquerResolution(valeurs, parametre.getResolution());
                 notesCandidates.add(noteCandidate);
             } else {
@@ -134,9 +132,10 @@ public class NoteFinalService {
                     erreursRegles.append(" ET ");
                 }
                 erreursRegles.append(String.format(
-                    "%s(différences)=%s %s %.2f",
+                    "%s(différences)=%.2f (arrondi à %.2f) %s %.2f",
                     parametre.getResolution().getRef(),
-                    String.format("%.2f", valeurDifference),
+                    valeurDifference,
+                    valeurArrondie,
                     getSymboleComparateur(parametre.getComparateur()),
                     parametre.getSeuil()
                 ));
@@ -147,7 +146,6 @@ public class NoteFinalService {
             throw new RuntimeException("Aucune règle respectée : " + erreursRegles.toString());
         }
         
-        // Note finale = moyenne des notes candidates
         return notesCandidates.stream()
             .mapToDouble(Double::doubleValue)
             .average()
@@ -155,8 +153,63 @@ public class NoteFinalService {
     }
     
     /**
-     * Calculer toutes les différences entre chaque paire de notes
+     * Arrondir une valeur au seuil le plus proche
+     * Si exactement au milieu : prendre le seuil inférieur
      */
+    private double arrondirAuSeuilLePlusProche(double valeur, List<Double> seuils) {
+        if (seuils.isEmpty()) {
+            return valeur;
+        }
+        
+        // Trouver les deux seuils encadrants
+        Double seuilInferieur = null;
+        Double seuilSuperieur = null;
+        
+        for (Double seuil : seuils) {
+            if (seuil <= valeur) {
+                seuilInferieur = seuil;
+            }
+            if (seuil > valeur && seuilSuperieur == null) {
+                seuilSuperieur = seuil;
+            }
+        }
+        
+        // Cas 1 : Valeur en dessous de tous les seuils
+        if (seuilInferieur == null && seuilSuperieur != null) {
+            return seuilSuperieur;
+        }
+        
+        // Cas 2 : Valeur au-dessus de tous les seuils
+        if (seuilInferieur != null && seuilSuperieur == null) {
+            return seuilInferieur;
+        }
+        
+        // Cas 3 : Valeur exactement sur un seuil
+        if (seuilInferieur != null && Math.abs(valeur - seuilInferieur) < 0.001) {
+            return seuilInferieur;
+        }
+        if (seuilSuperieur != null && Math.abs(valeur - seuilSuperieur) < 0.001) {
+            return seuilSuperieur;
+        }
+        
+        // Cas 4 : Valeur entre deux seuils
+        if (seuilInferieur != null && seuilSuperieur != null) {
+            double distanceInf = Math.abs(valeur - seuilInferieur);
+            double distanceSup = Math.abs(valeur - seuilSuperieur);
+            
+            // Si exactement au milieu, prendre le seuil inférieur
+            if (Math.abs(distanceInf - distanceSup) < 0.001) {
+                return seuilInferieur;
+            }
+            
+            // Sinon, prendre le plus proche
+            return (distanceInf < distanceSup) ? seuilInferieur : seuilSuperieur;
+        }
+        
+        // Par défaut, retourner la valeur telle quelle
+        return valeur;
+    }
+    
     private List<Double> calculerToutesDifferences(List<Double> valeurs) {
         List<Double> differences = new ArrayList<>();
         
@@ -170,9 +223,6 @@ public class NoteFinalService {
         return differences;
     }
     
-    /**
-     * Appliquer la résolution (MIN, MAX, AVERAGE) sur une liste de valeurs
-     */
     private double appliquerResolution(List<Double> valeurs, Resolution resolution) {
         switch (resolution.getRef()) {
             case MIN:
@@ -186,9 +236,6 @@ public class NoteFinalService {
         }
     }
     
-    /**
-     * Vérifier si la condition du comparateur est respectée
-     */
     private boolean verifierCondition(double valeur, Parametre parametre) {
         double seuil = parametre.getSeuil();
         
@@ -254,32 +301,44 @@ public class NoteFinalService {
         double diffMax = differences.stream().max(Double::compare).orElse(0.0);
         double diffMoyenne = differences.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
         
-        // Détails des différences
+        // Collecter tous les seuils
+        List<Double> seuils = parametres.stream()
+            .map(Parametre::getSeuil)
+            .distinct()
+            .sorted()
+            .collect(Collectors.toList());
+        
         List<String> differencesDetails = new ArrayList<>();
         for (int i = 0; i < valeurs.size(); i++) {
             for (int j = i + 1; j < valeurs.size(); j++) {
                 double diff = Math.abs(valeurs.get(i) - valeurs.get(j));
-                differencesDetails.add(String.format("|%.2f - %.2f| = %.2f", 
+                differencesDetails.add(String.format("|%.2f - %.2f| = %.2f",
                     valeurs.get(i), valeurs.get(j), diff));
             }
         }
-        
-        // Vérifier tous les paramètres
         List<Map<String, Object>> validationsParametres = new ArrayList<>();
         List<Double> notesCandidates = new ArrayList<>();
         
         for (Parametre parametre : parametres) {
             Map<String, Object> validationParam = new HashMap<>();
-            
-            // Vérification sur les différences
             double valeurDifference = appliquerResolution(differences, parametre.getResolution());
-            boolean respecte = verifierCondition(valeurDifference, parametre);
-            
-            // Note candidate basée sur les notes
+            double valeurArrondie = arrondirAuSeuilLePlusProche(valeurDifference, seuils);
+            boolean respecte = verifierCondition(valeurArrondie, parametre);
             double noteCandidate = appliquerResolution(valeurs, parametre.getResolution());
+            
+            // Informations sur l'arrondi
+            boolean aEteArrondie = Math.abs(valeurDifference - valeurArrondie) > 0.001;
+            String explicationArrondi = "";
+            
+            if (aEteArrondie) {
+                explicationArrondi = genererExplicationArrondi(valeurDifference, valeurArrondie, seuils);
+            }
             
             validationParam.put("parametre", parametre);
             validationParam.put("valeurDifference", valeurDifference);
+            validationParam.put("valeurArrondie", valeurArrondie);
+            validationParam.put("aEteArrondie", aEteArrondie);
+            validationParam.put("explicationArrondi", explicationArrondi);
             validationParam.put("noteCandidate", noteCandidate);
             validationParam.put("respecte", respecte);
             validationParam.put("symbole", getSymboleComparateur(parametre.getComparateur()));
@@ -313,10 +372,53 @@ public class NoteFinalService {
         details.put("diffMin", diffMin);
         details.put("diffMax", diffMax);
         details.put("diffMoyenne", diffMoyenne);
+        details.put("seuils", seuils);
         details.put("notesCandidates", notesCandidates);
         details.put("noteFinalCalculee", noteFinalCalculee);
         details.put("auMoinsUneRegleRespectee", !notesCandidates.isEmpty());
         
         return details;
+    }
+    
+    /**
+     * Générer une explication textuelle de l'arrondi
+     */
+    private String genererExplicationArrondi(double valeurOriginale, double valeurArrondie, List<Double> seuils) {
+        // Trouver les seuils encadrants
+        Double seuilInf = null;
+        Double seuilSup = null;
+        
+        for (Double seuil : seuils) {
+            if (seuil <= valeurOriginale && (seuilInf == null || seuil > seuilInf)) {
+                seuilInf = seuil;
+            }
+            if (seuil > valeurOriginale && (seuilSup == null || seuil < seuilSup)) {
+                seuilSup = seuil;
+            }
+        }
+        
+        if (seuilInf != null && seuilSup != null) {
+            double distInf = Math.abs(valeurOriginale - seuilInf);
+            double distSup = Math.abs(valeurOriginale - seuilSup);
+            
+            if (Math.abs(distInf - distSup) < 0.001) {
+                return String.format(
+                    "Valeur %.2f exactement au milieu entre %.2f et %.2f → arrondi au seuil inférieur %.2f",
+                    valeurOriginale, seuilInf, seuilSup, seuilInf
+                );
+            } else if (distInf < distSup) {
+                return String.format(
+                    "Valeur %.2f plus proche de %.2f (distance: %.2f) que de %.2f (distance: %.2f)",
+                    valeurOriginale, seuilInf, distInf, seuilSup, distSup
+                );
+            } else {
+                return String.format(
+                    "Valeur %.2f plus proche de %.2f (distance: %.2f) que de %.2f (distance: %.2f)",
+                    valeurOriginale, seuilSup, distSup, seuilInf, distInf
+                );
+            }
+        }
+        
+        return String.format("Valeur %.2f arrondie à %.2f", valeurOriginale, valeurArrondie);
     }
 }
