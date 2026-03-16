@@ -10,7 +10,7 @@ TRUNCATE TABLE notes;
 TRUNCATE TABLE resolution;
 TRUNCATE TABLE comparateur;
 TRUNCATE TABLE parametre;
-TRUNCATE TABLE note_finale;
+TRUNCATE TABLE note_final;
 
 -- Réactiver les vérifications de clés étrangères
 SET FOREIGN_KEY_CHECKS = 1;
@@ -19,7 +19,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 SELECT '=== TOUTES LES DONNÉES ONT ÉTÉ SUPPRIMÉES ===' AS Info;
 SELECT '' AS '';
 SELECT 'État des tables :' AS Info;
-SELECT 'Hotel' AS TableName, COUNT(*) AS Lignes FROM etudiant
+SELECT 'Eleve' AS TableName, COUNT(*) AS Lignes FROM etudiant
 UNION ALL
 SELECT 'Professeur', COUNT(*) FROM professeur
 UNION ALL
@@ -33,4 +33,4 @@ SELECT 'Comparateur', COUNT(*) FROM comparateur
 UNION ALL
 SELECT 'Parametre', COUNT(*) FROM parametre
 UNION ALL
-SELECT 'Note_finale', COUNT(*) FROM note_finale;
+SELECT 'note_final', COUNT(*) FROM note_final;
