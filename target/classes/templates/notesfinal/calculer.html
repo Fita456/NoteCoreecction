@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculer Note Finale</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #27ae60;
+            padding-bottom: 10px;
+        }
+        .info-box {
+            background: #e8f5e9;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+        .info-box h3 {
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+        .info-box ul {
+            margin-left: 20px;
+            color: #555;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+        }
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        select:focus {
+            outline: none;
+            border-color: #27ae60;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #229954;
+        }
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        .form-actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Calculer une Note Finale</h1>
+        
+        <div class="info-box">
+            <h3>ℹ️ Comment ça marche ?</h3>
+            <ul>
+                <li>Sélectionnez un étudiant et une matière</li>
+                <li>Le système récupère toutes les notes des différents professeurs</li>
+                <li>Il applique les règles de validation (paramètres)</li>
+                <li>Si les règles sont respectées, la note finale est calculée</li>
+                <li>La note finale est la moyenne des notes validées</li>
+            </ul>
+        </div>
+        
+        <form action="/notes-final/calculer" method="post">
+            <div class="form-group">
+                <label for="etudiantId">Étudiant *</label>
+                <select id="etudiantId" name="etudiantId" required>
+                    <option value="">-- Sélectionner un étudiant --</option>
+                    <option th:each="etudiant : ${etudiants}" 
+                            th:value="${etudiant.id}" 
+                            th:text="${etudiant.nom}"></option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="matiereId">Matière *</label>
+                <select id="matiereId" name="matiereId" required>
+                    <option value="">-- Sélectionner une matière --</option>
+                    <option th:each="matiere : ${matieres}" 
+                            th:value="${matiere.id}" 
+                            th:text="${matiere.name}"></option>
+                </select>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">
+                    🧮 Calculer la Note Finale
+                </button>
+                <a href="/notes-final" class="btn btn-secondary">❌ Annuler</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

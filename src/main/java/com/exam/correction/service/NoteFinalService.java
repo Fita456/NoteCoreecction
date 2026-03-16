@@ -48,14 +48,6 @@ public class NoteFinalService {
         noteFinalRepository.deleteById(id);
     }
     
-    /**
-     * Calculer et enregistrer la note finale pour un étudiant dans une matière
-     * LOGIQUE COMPLÈTE :
-     * 1. Calculer les différences entre notes
-     * 2. Pour chaque règle : vérifier RÉSOLUTION(différences) COMPARATEUR seuil
-     * 3. Si respectée : ajouter RÉSOLUTION(notes) aux notes candidates
-     * 4. Note finale = moyenne des notes candidates
-     */
     @Transactional
     public NoteFinal calculerEtEnregistrerNoteFinal(Long etudiantId, Long matiereId) {
         List<Notes> notes = notesRepository.findByEtudiantIdAndMatiereId(etudiantId, matiereId);
@@ -74,7 +66,6 @@ public class NoteFinalService {
             throw new RuntimeException("Aucun paramètre défini pour cette matière");
         }
         
-        // Calculer la note finale selon les règles
         double noteFinalCalculee = calculerNoteFinalAvecRegles(notes, parametres);
         
         Parametre parametrePrincipal = parametres.get(0);
@@ -100,7 +91,7 @@ public class NoteFinalService {
     }
     
     /**
-     * Calculer la note finale avec le système à 2 étapes
+     * Calculer la note finale SANS ARRONDI
      */
     private double calculerNoteFinalAvecRegles(List<Notes> notes, List<Parametre> parametres) {
         List<Double> valeurs = notes.stream()
@@ -108,25 +99,18 @@ public class NoteFinalService {
             .sorted()
             .collect(Collectors.toList());
         
-        // Calculer statistiques des notes
-        double minNotes = valeurs.stream().min(Double::compare).orElse(0.0);
-        double maxNotes = valeurs.stream().max(Double::compare).orElse(0.0);
-        double avgNotes = valeurs.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-        
-        // Calculer toutes les différences entre paires de notes
         List<Double> differences = calculerToutesDifferences(valeurs);
         
-        // Notes candidates basées sur les règles respectées
         List<Double> notesCandidates = new ArrayList<>();
         StringBuilder erreursRegles = new StringBuilder();
         
         for (Parametre parametre : parametres) {
-            // ÉTAPE 1 : Vérifier la règle sur les DIFFÉRENCES
             double valeurDifference = appliquerResolution(differences, parametre.getResolution());
+            
+            // PLUS D'ARRONDI - Vérifier directement avec la valeur calculée
             boolean respecte = verifierCondition(valeurDifference, parametre);
             
             if (respecte) {
-                // ÉTAPE 2 : Si respectée, ajouter RÉSOLUTION(notes) comme note candidate
                 double noteCandidate = appliquerResolution(valeurs, parametre.getResolution());
                 notesCandidates.add(noteCandidate);
             } else {
@@ -134,9 +118,9 @@ public class NoteFinalService {
                     erreursRegles.append(" ET ");
                 }
                 erreursRegles.append(String.format(
-                    "%s(différences)=%s %s %.2f",
+                    "%s(différences)=%.2f %s %.2f",
                     parametre.getResolution().getRef(),
-                    String.format("%.2f", valeurDifference),
+                    valeurDifference,
                     getSymboleComparateur(parametre.getComparateur()),
                     parametre.getSeuil()
                 ));
@@ -147,7 +131,6 @@ public class NoteFinalService {
             throw new RuntimeException("Aucune règle respectée : " + erreursRegles.toString());
         }
         
-        // Note finale = moyenne des notes candidates
         return notesCandidates.stream()
             .mapToDouble(Double::doubleValue)
             .average()
@@ -254,7 +237,12 @@ public class NoteFinalService {
         double diffMax = differences.stream().max(Double::compare).orElse(0.0);
         double diffMoyenne = differences.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
         
-        // Détails des différences
+        List<Double> seuils = parametres.stream()
+            .map(Parametre::getSeuil)
+            .distinct()
+            .sorted()
+            .collect(Collectors.toList());
+        
         List<String> differencesDetails = new ArrayList<>();
         for (int i = 0; i < valeurs.size(); i++) {
             for (int j = i + 1; j < valeurs.size(); j++) {
@@ -264,18 +252,16 @@ public class NoteFinalService {
             }
         }
         
-        // Vérifier tous les paramètres
         List<Map<String, Object>> validationsParametres = new ArrayList<>();
         List<Double> notesCandidates = new ArrayList<>();
         
         for (Parametre parametre : parametres) {
             Map<String, Object> validationParam = new HashMap<>();
             
-            // Vérification sur les différences
             double valeurDifference = appliquerResolution(differences, parametre.getResolution());
-            boolean respecte = verifierCondition(valeurDifference, parametre);
             
-            // Note candidate basée sur les notes
+            // PLUS D'ARRONDI
+            boolean respecte = verifierCondition(valeurDifference, parametre);
             double noteCandidate = appliquerResolution(valeurs, parametre.getResolution());
             
             validationParam.put("parametre", parametre);
@@ -313,6 +299,7 @@ public class NoteFinalService {
         details.put("diffMin", diffMin);
         details.put("diffMax", diffMax);
         details.put("diffMoyenne", diffMoyenne);
+        details.put("seuils", seuils);
         details.put("notesCandidates", notesCandidates);
         details.put("noteFinalCalculee", noteFinalCalculee);
         details.put("auMoinsUneRegleRespectee", !notesCandidates.isEmpty());
