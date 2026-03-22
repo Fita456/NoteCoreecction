@@ -58,8 +58,6 @@ echo.
 echo   Toutes les donnees ont ete supprimees.
 echo   Les tables et la structure de la base sont conservees.
 echo.
-echo   Pour reimporter des donnees : import_donnees.bat
-echo   Pour recreer la base complete : reset_database.bat
 echo.
 pause
 exit /b 0
