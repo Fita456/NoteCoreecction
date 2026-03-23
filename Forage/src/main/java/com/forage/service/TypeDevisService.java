@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class TypeDevisService {
     private final TypeDevisRepository typeDevisRepository;
 
-        public TypeDevis findById(Long id) {
+        public TypeDevis findById(int id) {
             return typeDevisRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("TypeDevis non trouvé: " + id));
         }

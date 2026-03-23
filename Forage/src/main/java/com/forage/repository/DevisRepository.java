@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DevisRepository extends JpaRepository<Devis, Long> {
+public interface DevisRepository extends JpaRepository<Devis, Integer> {
     
-    Optional<Devis> findByDemandeId(Long demandeId);
+    Optional<Devis> findByDemandeId(int demandeId);
     
     @Query("SELECT d FROM Devis d " +
            "LEFT JOIN FETCH d.demande dem " +

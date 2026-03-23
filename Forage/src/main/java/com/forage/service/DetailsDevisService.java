@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 public class DetailsDevisService {
     private final DetailsDevisRepository detailsDevisRepository;
 
-    public DetailsDevis findById(Long id) {
+    public DetailsDevis findById(int id) {
         return detailsDevisRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("DetailsDevis non trouvé: " + id));
     }

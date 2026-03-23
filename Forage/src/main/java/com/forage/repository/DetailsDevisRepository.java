@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DetailsDevisRepository extends JpaRepository<DetailsDevis, Long> {
-    List<DetailsDevis> findByDevisId(Long devisId);
+public interface DetailsDevisRepository extends JpaRepository<DetailsDevis, Integer> {
+    List<DetailsDevis> findByDevisId(int devisId);
 }

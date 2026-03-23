@@ -31,11 +31,11 @@ public class DevisController {
     }
     
     @GetMapping("/new")
-    public String createForm(@RequestParam(required = false) Long demandeId, Model model) {
+    public String createForm(@RequestParam(required = false) int demandeId, Model model) {
         Devis devis = new Devis();
         devis.setDate(LocalDate.now());
         
-        if (demandeId != null) {
+        if (demandeId != 0) {
             devis.setDemande(demandeService.findById(demandeId));
         }
         
@@ -46,7 +46,7 @@ public class DevisController {
     }
     
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model) {
+    public String editForm(@PathVariable int id, Model model) {
         model.addAttribute("devis", devisService.findById(id));
         model.addAttribute("demandes", demandeService.findAll());
         model.addAttribute("typesDevis", typeDevisRepository.findAll());
@@ -70,7 +70,7 @@ public class DevisController {
     }
     
     @GetMapping("/{id}")
-    public String view(@PathVariable Long id, Model model) {
+    public String view(@PathVariable int id, Model model) {
         Devis devis = devisService.findById(id);
         model.addAttribute("devis", devis);
         model.addAttribute("details", devisService.getDetails(id));
@@ -79,7 +79,7 @@ public class DevisController {
     }
     
     @PostMapping("/{id}/details")
-    public String addDetail(@PathVariable Long id,
+    public String addDetail(@PathVariable int id,
                             @Valid @ModelAttribute("newDetail") DetailsDevis detail,
                             BindingResult result,
                             RedirectAttributes redirectAttributes) {
@@ -94,8 +94,8 @@ public class DevisController {
     }
     
     @GetMapping("/{id}/details/{detailId}/delete")
-    public String deleteDetail(@PathVariable Long id,
-                               @PathVariable Long detailId,
+    public String deleteDetail(@PathVariable int id,
+                               @PathVariable int detailId,
                                RedirectAttributes redirectAttributes) {
         devisService.removeDetail(id, detailId);
         redirectAttributes.addFlashAttribute("success", "Détail supprimé");
@@ -103,7 +103,7 @@ public class DevisController {
     }
     
     @GetMapping("/{id}/delete")
-    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String delete(@PathVariable int id, RedirectAttributes redirectAttributes) {
         try {
             devisService.deleteById(id);
             redirectAttributes.addFlashAttribute("success", "Devis supprimé");

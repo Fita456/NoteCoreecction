@@ -36,13 +36,13 @@ public class DemandeController {
     }
     
     @GetMapping("/{id}/view_by_client")
-    public String viewByClient(@PathVariable Long id, Model model) {
+    public String viewByClient(@PathVariable int id, Model model) {
         model.addAttribute("demandes", demandeService.findByClientId(id));
         return "demande/list_client";
     }
 
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model) {
+    public String editForm(@PathVariable int id, Model model) {
         model.addAttribute("demande", demandeService.findById(id));
         model.addAttribute("clients", clientService.findAll());
         return "demande/form";
@@ -51,7 +51,7 @@ public class DemandeController {
     @PostMapping("/save")
     public String save(@Valid @ModelAttribute Demande demande,
                        BindingResult result,
-                       @RequestParam(required = false) Long statusId,
+                       @RequestParam(required = false) int statusId,
                        Model model,
                        RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
@@ -60,7 +60,7 @@ public class DemandeController {
             return "demande/form";
         }
         
-        if (demande.getId() == null) {
+        if (demande.getId() == 0) {
             demandeService.saveWithInitialStatus(demande, statusId);
         } else {
             demandeService.save(demande);
@@ -71,7 +71,7 @@ public class DemandeController {
     }
     
     @GetMapping("/{id}")
-    public String view(@PathVariable Long id, Model model) {
+    public String view(@PathVariable int id, Model model) {
         Demande demande = demandeService.findById(id);
         model.addAttribute("demande", demande);
         model.addAttribute("historiqueStatus", demandeService.getHistoriqueStatus(id));
@@ -80,8 +80,8 @@ public class DemandeController {
     }
     
     @PostMapping("/{id}/status")
-    public String changerStatus(@PathVariable Long id,
-                                @RequestParam Long statusId,
+    public String changerStatus(@PathVariable int id,
+                                @RequestParam int statusId,
                                 @RequestParam(required = false) String commentaire,
                                 RedirectAttributes redirectAttributes) {
         demandeService.changerStatus(id, statusId, commentaire);
@@ -90,7 +90,7 @@ public class DemandeController {
     }
     
     @GetMapping("/{id}/delete")
-    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String delete(@PathVariable int id, RedirectAttributes redirectAttributes) {
         try {
             demandeService.deleteById(id);
             redirectAttributes.addFlashAttribute("success", "Demande supprimée");

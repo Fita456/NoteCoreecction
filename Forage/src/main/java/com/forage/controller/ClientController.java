@@ -30,7 +30,7 @@ public class ClientController {
     }
     
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model) {
+    public String editForm(@PathVariable int id, Model model) {
         model.addAttribute("client", clientService.findById(id));
         return "client/form";
     }
@@ -49,7 +49,7 @@ public class ClientController {
     }
     
     @GetMapping("/{id}/delete")
-    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String delete(@PathVariable int id, RedirectAttributes redirectAttributes) {
         try {
             clientService.deleteById(id);
             redirectAttributes.addFlashAttribute("success", "Client supprimé avec succès");
@@ -60,7 +60,7 @@ public class ClientController {
     }
     
     @GetMapping("/{id}")
-    public String view(@PathVariable Long id, Model model) {
+    public String view(@PathVariable int id, Model model) {
         model.addAttribute("client", clientService.findById(id));
         return "client/view";
     }

@@ -15,7 +15,7 @@ public class DemandeStatus {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
     
     @NotNull(message = "La date est obligatoire")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")

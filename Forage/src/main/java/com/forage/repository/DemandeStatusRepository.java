@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DemandeStatusRepository extends JpaRepository<DemandeStatus, Long> {
-    List<DemandeStatus> findByDemandeIdOrderByDateDesc(Long demandeId);
+public interface DemandeStatusRepository extends JpaRepository<DemandeStatus, Integer> {
+    List<DemandeStatus> findByDemandeIdOrderByDateDesc(int demandeId);
 }

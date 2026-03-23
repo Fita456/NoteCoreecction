@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DemandeRepository extends JpaRepository<Demande, Long> {
+public interface DemandeRepository extends JpaRepository<Demande, Integer> {
     
-    List<Demande> findByClientId(Long clientId);
+    List<Demande> findByClientId(int clientId);
     
     List<Demande> findByDistrict(String district);
     

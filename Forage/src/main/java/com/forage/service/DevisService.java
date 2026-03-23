@@ -22,7 +22,7 @@ public class DevisService {
         return devisRepository.findAllWithDetails();
     }
     
-    public Devis findById(Long id) {
+    public Devis findById(int id) {
         return devisRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Devis non trouvé: " + id));
     }
@@ -31,18 +31,18 @@ public class DevisService {
         return devisRepository.save(devis);
     }
     
-    public void deleteById(Long id) {
+    public void deleteById(int id) {
         devisRepository.deleteById(id);
     }
     
-    public DetailsDevis addDetail(Long devisId, DetailsDevis detail) {
+    public DetailsDevis addDetail(int devisId, DetailsDevis detail) {
         Devis devis = findById(devisId);
         devis.addDetail(detail);
         devisRepository.save(devis);
         return detail;
     }
     
-    public void removeDetail(Long devisId, Long detailId) {
+    public void removeDetail(int devisId, int detailId) {
         Devis devis = findById(devisId);
         DetailsDevis detail = detailsDevisRepository.findById(detailId)
             .orElseThrow(() -> new RuntimeException("Détail non trouvé"));
@@ -50,7 +50,7 @@ public class DevisService {
         devisRepository.save(devis);
     }
     
-    public List<DetailsDevis> getDetails(Long devisId) {
+    public List<DetailsDevis> getDetails(int devisId) {
         return detailsDevisRepository.findByDevisId(devisId);
     }
 }

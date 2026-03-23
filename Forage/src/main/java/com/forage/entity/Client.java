@@ -17,7 +17,7 @@ import java.util.List;
 public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @NotBlank(message = "le nom est requis pour le cients qui essaye d'envoyer leur demande")
     @Column(nullable = false)

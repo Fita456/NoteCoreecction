@@ -26,11 +26,11 @@ public class DemandeService {
         return demandeRepository.findAllWithClient();
     }
 
-    public List<Demande> findByClientId(Long clientId) {
+    public List<Demande> findByClientId(int clientId) {
         return demandeRepository.findByClientId(clientId);
     }
     
-    public Demande findById(Long id) {
+    public Demande findById(int id) {
         return demandeRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Demande non trouvée: " + id));
     }
@@ -39,10 +39,10 @@ public class DemandeService {
         return demandeRepository.save(demande);
     }
     
-    public Demande saveWithInitialStatus(Demande demande, Long statusId) {
+    public Demande saveWithInitialStatus(Demande demande, int statusId) {
         Demande savedDemande = demandeRepository.save(demande);
         
-        if (statusId != null) {
+        if (statusId != 0) {
             Status status = statusRepository.findById(statusId)
                 .orElseThrow(() -> new RuntimeException("Status non trouvé"));
             
@@ -56,11 +56,11 @@ public class DemandeService {
         return savedDemande;
     }
     
-    public void deleteById(Long id) {
+    public void deleteById(int id) {
         demandeRepository.deleteById(id);
     }
     
-    public void changerStatus(Long demandeId, Long statusId, String commentaire) {
+    public void changerStatus(int demandeId, int statusId, String commentaire) {
         Demande demande = findById(demandeId);
         Status status = statusRepository.findById(statusId)
             .orElseThrow(() -> new RuntimeException("Status non trouvé"));
@@ -74,7 +74,7 @@ public class DemandeService {
         demandeStatusRepository.save(demandeStatus);
     }
     
-    public List<DemandeStatus> getHistoriqueStatus(Long demandeId) {
+    public List<DemandeStatus> getHistoriqueStatus(int demandeId) {
         return demandeStatusRepository.findByDemandeIdOrderByDateDesc(demandeId);
     }
 }

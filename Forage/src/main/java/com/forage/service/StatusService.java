@@ -18,7 +18,7 @@ public class StatusService {
         return statusRepository.findAll();
     }
 
-    public Status getStatusById(Long id) {
+    public Status getStatusById(int id) {
         return statusRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Status not found with id: " + id));
     }

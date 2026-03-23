@@ -17,7 +17,7 @@ public class DemandeStatusService {
         return demandeStatusRepository.findAll();
     }
 
-    public DemandeStatus findById(Long id) {
+    public DemandeStatus findById(int id) {
         return demandeStatusRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("DemandeStatus non trouvé: " + id));
     }

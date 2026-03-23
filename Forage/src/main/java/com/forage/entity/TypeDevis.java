@@ -14,7 +14,7 @@ public class TypeDevis {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
     
     @NotBlank(message = "Le libellé est obligatoire")
     @Column(nullable = false, unique = true)

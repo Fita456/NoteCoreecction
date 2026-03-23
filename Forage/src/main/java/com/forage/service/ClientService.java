@@ -19,7 +19,7 @@ public class ClientService {
         return clientRepository.findAll();
     }
     
-    public Client findById(Long id) {
+    public Client findById(int id) {
         return clientRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Client non trouvé: " + id));
     }
@@ -28,7 +28,7 @@ public class ClientService {
         return clientRepository.save(client);
     }
     
-    public void deleteById(Long id) {
+    public void deleteById(int id) {
         clientRepository.deleteById(id);
     }
     
