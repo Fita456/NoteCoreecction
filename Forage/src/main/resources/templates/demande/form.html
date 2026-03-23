@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire - Demandes</title>
+</head>
+<body>
+    <h1>Formulaire - Demandes</h1>
+
+    <form action="/demandes/save" method="post">
+        <input type="hidden" name="id" th:value="${demande.id}">
+
+        <label for="Date">Date:</label>
+        <input type="date" id="date" name="date" th:value="${demande.date}" required><br><br>
+
+        <label for="lieu">Lieu:</label>
+        <input type="text" id="lieu" name="lieu" th:value="${demande.lieu}" required><br><br>
+
+        <label for="District">District:</label>
+        <input type="text" id="District" name="District" th:value="${demande.district}" required><br><br>
+
+        <label for="client">Client:</label>
+        <select id="client" name="clientId" required>
+            <option value="" disabled selected>Choisir un client</option>
+            <option th:each="client : ${clients}" th:value="${client.id}" th:text="${client.nom}" th:selected="${client.id == demande.client?.id}"></option>
+        </select><br><br>
+
+        <button type="submit">Enregistrer</button>
+    </form>
+</body>
+</html>

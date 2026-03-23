@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List - Client</title>
+</head>
+<body>
+    <h1>List des Clients </h1>
+    <table border="1">
+        <tr>
+            <th>Id</th>
+            <th>Nom</th>
+            <th>Contact</th>
+            <th>Actions</th>
+        </tr>
+        <tr th:each="client : ${clients}">
+            <td th:text="${client.id}"></td>
+            <td th:text="${client.nom}"></td>
+            <td th:text="${client.contact}"></td>
+            <td>
+                <a th:href="@{/clients/edit/{id}(id=${client.id})}">Editer</a>
+                <a th:href="@{/clients/delete/{id}(id=${client.id})}">Supprimer</a>
+            </td>
+        </tr>
+    </table>
+    <a href="/clients/new">Ajouter un nouveau client</a>
+</body>
+</html>

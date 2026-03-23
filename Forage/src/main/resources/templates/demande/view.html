@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Details - Demande</title>
+</head>
+<body>
+    <h1>Details du Demande </h1>
+
+    <p><strong>ID:</strong> {{ demande.id }}</p>
+    <p><strong>Clients:</strong> {{ demande.client?.nom }}</p>
+    <p><strong>Lieu:</strong> {{ demande.lieu }}</p>
+    <p><strong>District:</strong> {{ demande.District }}</p>
+    <p><strong>Date:</strong> {{ demande.date }}</p>
+    <button type="submit" onclick="Modifier()">Modifier</button>
+    <button type="submit" onclick="Supprimer()">Supprimer</button>
+
+</body>
+</html>
+<script>
+
+function Modifier() {
+    
+}
+
+function Supprimer() {
+    
+}
+
+</script>

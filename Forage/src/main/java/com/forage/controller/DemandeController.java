@@ -35,6 +35,12 @@ public class DemandeController {
         return "demande/form";
     }
     
+    @GetMapping("/{id}/view_by_client")
+    public String viewByClient(@PathVariable Long id, Model model) {
+        model.addAttribute("demandes", demandeService.findByClientId(id));
+        return "demande/list_client";
+    }
+
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
         model.addAttribute("demande", demandeService.findById(id));

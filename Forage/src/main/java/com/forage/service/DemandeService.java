@@ -25,6 +25,10 @@ public class DemandeService {
     public List<Demande> findAll() {
         return demandeRepository.findAllWithClient();
     }
+
+    public List<Demande> findByClientId(Long clientId) {
+        return demandeRepository.findByClientId(clientId);
+    }
     
     public Demande findById(Long id) {
         return demandeRepository.findById(id)

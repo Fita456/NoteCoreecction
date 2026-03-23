@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Details - Client</title>
+</head>
+<body>
+    <h1>Details - Client</h1>
+    <p><strong>Id:</strong> <span th:text="${client.id}"></span></p>
+    <p><strong>Nom:</strong> <span th:text="${client.nom}"></span></p>
+    <p><strong>Contact:</strong> <span th:text="${client.contact}"></span></p>
+    <p>Demande du Clients: <a href="@{/demandes/{id}/view_by_client(id=${client.id})}">List des demande du client</a></p>
+</body>
+</html>
