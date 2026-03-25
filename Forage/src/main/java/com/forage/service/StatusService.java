@@ -23,5 +23,7 @@ public class StatusService {
                 .orElseThrow(() -> new RuntimeException("Status not found with id: " + id));
     }
 
-
+    public List<Status> findAll() {
+        return statusRepository.findAll();
+    }
 }

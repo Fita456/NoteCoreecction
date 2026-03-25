@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -22,7 +23,7 @@ public class Demande {
     
     @NotNull(message = "La date est obligatoire")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Column(nullable = false)
+    @Column(name = "date_demande", nullable = false)
     private LocalDate date;
     
     @NotBlank(message = "Le lieu est obligatoire")
@@ -38,16 +39,31 @@ public class Demande {
     @NotNull(message = "Le client est obligatoire")
     private Client client;
     
-    @OneToOne(mappedBy = "demande", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Devis devis;
     
-    @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL)
-    @OrderBy("date DESC")
+    @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<DemandeStatus> historiqueStatus = new ArrayList<>();
     
-    // Méthode utilitaire pour obtenir le dernier statut
+    // Méthode pour obtenir le dernier statut (sécurisée)
     @Transient
     public DemandeStatus getDernierStatus() {
-        return historiqueStatus.isEmpty() ? null : historiqueStatus.get(0);
+        if (historiqueStatus == null || historiqueStatus.isEmpty()) {
+            return null;
+        }
+        // Trier par date décroissante et prendre le premier
+        return historiqueStatus.stream()
+            .max(Comparator.comparing(DemandeStatus::getDateStatus))
+            .orElse(null);
+    }
+    
+    // Méthode utilitaire pour le libellé du dernier statut
+    @Transient
+    public String getDernierStatusLibelle() {
+        DemandeStatus dernier = getDernierStatus();
+        if (dernier != null && dernier.getStatus() != null) {
+            return dernier.getStatus().getLibelle();
+        }
+        return "Non défini";
     }
 }

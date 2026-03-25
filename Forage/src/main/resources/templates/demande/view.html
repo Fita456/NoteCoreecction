@@ -1,31 +1,149 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Details - Demande</title>
+    <title>Détail Demande</title>
 </head>
 <body>
-    <h1>Details du Demande </h1>
-
-    <p><strong>ID:</strong> {{ demande.id }}</p>
-    <p><strong>Clients:</strong> {{ demande.client?.nom }}</p>
-    <p><strong>Lieu:</strong> {{ demande.lieu }}</p>
-    <p><strong>District:</strong> {{ demande.District }}</p>
-    <p><strong>Date:</strong> {{ demande.date }}</p>
-    <button type="submit" onclick="Modifier()">Modifier</button>
-    <button type="submit" onclick="Supprimer()">Supprimer</button>
-
+<div layout:fragment="content">
+    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-file-text"></i> Demande #<span th:text="${demande.id}"></span></h2>
+        <div>
+            <a th:href="@{/demandes/{id}/edit(id=${demande.id})}" class="btn btn-warning">
+                <i class="bi bi-pencil"></i> Modifier
+            </a>
+            <a th:href="@{/demandes}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        
+        <!-- Informations Demande -->
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-info-circle"></i> Informations
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="120">Date :</th>
+                            <td th:text="${#temporals.format(demande.dateDemande, 'dd/MM/yyyy')}"></td>
+                        </tr>
+                        <tr>
+                            <th>Client :</th>
+                            <td th:text="${demande.client?.nom}"></td>
+                        </tr>
+                        <tr>
+                            <th>Contact :</th>
+                            <td th:text="${demande.client?.contact}"></td>
+                        </tr>
+                        <tr>
+                            <th>Lieu :</th>
+                            <td th:text="${demande.lieu}"></td>
+                        </tr>
+                        <tr>
+                            <th>District :</th>
+                            <td th:text="${demande.district}"></td>
+                        </tr>
+                        <tr>
+                            <th>Statut actuel :</th>
+                            <td>
+                                <span class="badge bg-info fs-6" th:text="${demande.dernierStatusLibelle}"></span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Lien vers Devis -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="bi bi-receipt"></i> Devis
+                </div>
+                <div class="card-body">
+                    <div th:if="${demande.devis != null}">
+                        <p>Montant : <strong th:text="${#numbers.formatDecimal(demande.devis.montantTotal, 0, 'COMMA', 0, 'POINT')} + ' Ar'"></strong></p>
+                        <a th:href="@{/devis/{id}(id=${demande.devis.id})}" class="btn btn-info">
+                            <i class="bi bi-eye"></i> Voir le devis
+                        </a>
+                    </div>
+                    <div th:if="${demande.devis == null}">
+                        <p class="text-muted">Aucun devis créé</p>
+                        <a th:href="@{/devis/new(demandeId=${demande.id})}" class="btn btn-success">
+                            <i class="bi bi-plus"></i> Créer un devis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Historique des Statuts -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-clock-history"></i> Historique des Statuts
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Formulaire Ajouter Statut -->
+                    <form th:action="@{/demandes/{id}/status(id=${demande.id})}" method="post" class="mb-4">
+                        <div class="row g-2">
+                            <div class="col-md-5">
+                                <select name="statusId" class="form-select" required>
+                                    <option value="">-- Nouveau statut --</option>
+                                    <option th:each="s : ${statuses}" 
+                                            th:value="${s.id}" 
+                                            th:text="${s.libelle}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <input type="text" name="commentaire" class="form-control" 
+                                       placeholder="Commentaire (optionnel)">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <hr>
+                    
+                    <!-- Liste Historique -->
+                    <div class="timeline">
+                        <div th:each="hs, iter : ${historiqueStatus}" class="mb-3">
+                            <div class="card" th:classappend="${iter.first ? 'border-success' : 'border-secondary'}">
+                                <div class="card-body p-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="badge" 
+                                              th:classappend="${iter.first ? 'bg-success' : 'bg-secondary'}"
+                                              th:text="${hs.status.libelle}"></span>
+                                        <small class="text-muted" 
+                                               th:text="${#temporals.format(hs.dateStatus, 'dd/MM/yyyy HH:mm')}"></small>
+                                    </div>
+                                    <p class="mb-0 mt-1 small" th:if="${hs.commentaire}" 
+                                       th:text="${hs.commentaire}"></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div th:if="${#lists.isEmpty(historiqueStatus)}" class="text-muted text-center">
+                            Aucun historique
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
 </body>
 </html>
-<script>
-
-function Modifier() {
-    
-}
-
-function Supprimer() {
-    
-}
-
-</script>

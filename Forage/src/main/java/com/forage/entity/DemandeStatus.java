@@ -19,9 +19,10 @@ public class DemandeStatus {
     
     @NotNull(message = "La date est obligatoire")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    @Column(nullable = false)
-    private LocalDateTime date;
+    @Column(name = "date_status", nullable = false)
+    private LocalDateTime dateStatus;
     
+    @Column(columnDefinition = "TEXT")
     private String commentaire;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,10 +35,11 @@ public class DemandeStatus {
     @NotNull(message = "Le statut est obligatoire")
     private Status status;
     
+    // Date automatique avant insertion
     @PrePersist
     public void prePersist() {
-        if (date == null) {
-            date = LocalDateTime.now();
+        if (dateStatus == null) {
+            dateStatus = LocalDateTime.now();
         }
     }
 }
