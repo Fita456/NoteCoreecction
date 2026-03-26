@@ -1,38 +1,22 @@
--- ============================================
--- BASE DE DONNÉES FORAGE - MySQL/MariaDB
--- ============================================
-
 CREATE DATABASE IF NOT EXISTS forage;
 USE forage;
 
--- ============================================
--- TABLE: clients
--- ============================================
 CREATE TABLE clients (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
     contact VARCHAR(255) NOT NULL
 );
 
--- ============================================
--- TABLE: status
--- ============================================
 CREATE TABLE status (
     id INT AUTO_INCREMENT PRIMARY KEY,
     libelle VARCHAR(100) NOT NULL UNIQUE
 );
 
--- ============================================
--- TABLE: types_devis
--- ============================================
 CREATE TABLE types_devis (
     id INT AUTO_INCREMENT PRIMARY KEY,
     libelle VARCHAR(100) NOT NULL UNIQUE
 );
 
--- ============================================
--- TABLE: demandes
--- ============================================
 CREATE TABLE demandes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     date_demande DATE NOT NULL,
@@ -43,9 +27,6 @@ CREATE TABLE demandes (
     FOREIGN KEY (client_id) REFERENCES clients(id)
 );
 
--- ============================================
--- TABLE: devis
--- ============================================
 CREATE TABLE devis (
     id INT AUTO_INCREMENT PRIMARY KEY,
     date_devis DATE NOT NULL,
@@ -57,21 +38,17 @@ CREATE TABLE devis (
     FOREIGN KEY (demande_id) REFERENCES demandes(id)
 );
 
--- ============================================
--- TABLE: details_devis
--- ============================================
 CREATE TABLE details_devis (
     id INT AUTO_INCREMENT PRIMARY KEY,
     libelle VARCHAR(255) NOT NULL,
-    montant DECIMAL(15, 2) NOT NULL,
+    prix_unitaire DECIMAL(15, 2) NOT NULL,
+    quantite INT NOT NULL,
+    Total DECIMAL(15, 2) AS (prix_unitaire * quantite) STORED,
     devis_id INT NOT NULL,
 
     FOREIGN KEY (devis_id) REFERENCES devis(id)
 );
 
--- ============================================
--- TABLE: demande_status
--- ============================================
 CREATE TABLE demande_status (
     id INT AUTO_INCREMENT PRIMARY KEY,
     date_status TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

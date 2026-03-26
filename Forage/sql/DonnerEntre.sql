@@ -7,29 +7,16 @@
 USE forage;
 
 -- ============================================
--- VIDER LES TABLES (dans l'ordre des dépendances)
--- ============================================
-SET FOREIGN_KEY_CHECKS = 0;
-TRUNCATE TABLE demande_status;
-TRUNCATE TABLE details_devis;
-TRUNCATE TABLE devis;
-TRUNCATE TABLE demandes;
-TRUNCATE TABLE clients;
-TRUNCATE TABLE status;
-TRUNCATE TABLE types_devis;
-SET FOREIGN_KEY_CHECKS = 1;
-
--- ============================================
 -- TABLE: status
 -- ============================================
 INSERT INTO status (id, libelle) VALUES 
-    (1, 'En attente'),
-    (2, 'En cours d''étude'),
-    (3, 'Devis envoyé'),
+    (1, 'Demande Créée'),
+    (2, 'Devis en étude valide'),
+    (3, 'Demande en cours'),
     (4, 'Validé'),
-    (5, 'En cours de réalisation'),
+    (5, 'En cours de Validation'),
     (6, 'Terminé'),
-    (7, 'Rejeté'),
+    (7, 'Devis d etude Rejeté'),
     (8, 'Annulé');
 
 -- ============================================
@@ -40,8 +27,7 @@ INSERT INTO types_devis (id, libelle) VALUES
     (2, 'Forage moyen (30-60m)'),
     (3, 'Forage profond (60m+)'),
     (4, 'Réhabilitation'),
-    (5, 'Entretien'),
-    (6, 'Étude de faisabilité');
+    (5, 'Entretien');
 
 -- ============================================
 -- TABLE: clients
@@ -159,61 +145,6 @@ INSERT INTO demande_status (id, date_status, demande_id, status_id, commentaire)
     (36, '2024-02-10 15:00:00', 12, 2, 'Étude préliminaire'),
     (37, '2024-02-15 10:00:00', 12, 8, 'ANNULÉ - Litige foncier en cours');
 
--- ============================================
--- TABLE: devis (pour demandes avec devis)
--- ============================================
-INSERT INTO devis (id, date_devis, montant_total, type_devis_id, demande_id) VALUES 
-    (1, '2024-01-18', 15500000.00, 1, 1),  -- Demande 1 terminée
-    (2, '2024-01-20', 28000000.00, 2, 2),  -- Demande 2 terminée
-    (3, '2024-02-08', 45000000.00, 3, 3),  -- Demande 3 en cours
-    (4, '2024-02-20', 22000000.00, 2, 4),  -- Demande 4 devis envoyé
-    (5, '2024-03-12', 12000000.00, 1, 10); -- Demande 10 validée
-
--- ============================================
--- TABLE: details_devis
--- ============================================
-
--- Devis 1 (Demande 1 - Forage simple)
-INSERT INTO details_devis (id, libelle, montant, devis_id) VALUES 
-    (1, 'Étude géophysique', 2000000.00, 1),
-    (2, 'Forage 25m', 8000000.00, 1),
-    (3, 'Tubage PVC', 1500000.00, 1),
-    (4, 'Pompe manuelle India Mark II', 2500000.00, 1),
-    (5, 'Main d''œuvre', 1500000.00, 1);
-
--- Devis 2 (Demande 2 - Forage moyen)
-INSERT INTO details_devis (id, libelle, montant, devis_id) VALUES 
-    (6, 'Étude géophysique approfondie', 3000000.00, 2),
-    (7, 'Forage 45m', 15000000.00, 2),
-    (8, 'Tubage acier inox', 3000000.00, 2),
-    (9, 'Pompe immergée', 4000000.00, 2),
-    (10, 'Installation électrique', 2000000.00, 2),
-    (11, 'Main d''œuvre', 1000000.00, 2);
-
--- Devis 3 (Demande 3 - Forage profond JIRAMA)
-INSERT INTO details_devis (id, libelle, montant, devis_id) VALUES 
-    (12, 'Étude hydrogéologique complète', 5000000.00, 3),
-    (13, 'Forage 80m', 25000000.00, 3),
-    (14, 'Tubage acier renforcé', 5000000.00, 3),
-    (15, 'Pompe industrielle', 6000000.00, 3),
-    (16, 'Système de filtration', 2000000.00, 3),
-    (17, 'Main d''œuvre spécialisée', 2000000.00, 3);
-
--- Devis 4 (Demande 4 - ONG)
-INSERT INTO details_devis (id, libelle, montant, devis_id) VALUES 
-    (18, 'Étude de site', 2500000.00, 4),
-    (19, 'Forage 40m', 12000000.00, 4),
-    (20, 'Équipement complet', 5000000.00, 4),
-    (21, 'Formation communautaire', 1500000.00, 4),
-    (22, 'Main d''œuvre', 1000000.00, 4);
-
--- Devis 5 (Demande 10 - Ministère)
-INSERT INTO details_devis (id, libelle, montant, devis_id) VALUES 
-    (23, 'Étude rapide', 1500000.00, 5),
-    (24, 'Forage 20m', 6000000.00, 5),
-    (25, 'Pompe manuelle', 2500000.00, 5),
-    (26, 'Aménagement surface', 1000000.00, 5),
-    (27, 'Main d''œuvre', 1000000.00, 5);
 
 -- ============================================
 -- FIN DU SCRIPT

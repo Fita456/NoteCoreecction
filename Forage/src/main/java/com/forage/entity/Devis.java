@@ -2,7 +2,6 @@ package com.forage.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -23,10 +22,9 @@ public class Devis {
     
     @NotNull(message = "La date est obligatoire")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Column(nullable = false)
-    private LocalDate date;
+    @Column(name = "date_devis", nullable = false)
+    private LocalDate dateDevis;
     
-    @PositiveOrZero(message = "Le montant doit être positif")
     @Column(name = "montant_total", precision = 15, scale = 2)
     private BigDecimal montantTotal = BigDecimal.ZERO;
     
@@ -43,24 +41,38 @@ public class Devis {
     @OneToMany(mappedBy = "devis", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetailsDevis> details = new ArrayList<>();
     
-    // Méthode pour recalculer le montant total
+    // Recalculer le montant total
     public void calculerMontantTotal() {
         this.montantTotal = details.stream()
-            .map(DetailsDevis::getMontant)
+            .map(d -> {
+                d.calculerTotal();
+                return d.getTotal();
+            })
+            .filter(t -> t != null)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
     
-    // Méthode utilitaire pour ajouter un détail
+    // Ajouter un détail
     public void addDetail(DetailsDevis detail) {
         details.add(detail);
         detail.setDevis(this);
         calculerMontantTotal();
     }
     
-    // Méthode utilitaire pour supprimer un détail
+    // Supprimer un détail
     public void removeDetail(DetailsDevis detail) {
         details.remove(detail);
         detail.setDevis(null);
         calculerMontantTotal();
+    }
+    
+    // Vider et ajouter tous les détails
+    public void setAllDetails(List<DetailsDevis> newDetails) {
+        this.details.clear();
+        if (newDetails != null) {
+            for (DetailsDevis detail : newDetails) {
+                addDetail(detail);
+            }
+        }
     }
 }

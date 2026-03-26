@@ -1,13 +1,13 @@
 package com.forage.service;
 
-import com.forage.entity.Devis;
-import com.forage.entity.DetailsDevis;
-import com.forage.repository.DevisRepository;
-import com.forage.repository.DetailsDevisRepository;
+import com.forage.entity.*;
+import com.forage.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -17,40 +17,130 @@ public class DevisService {
     
     private final DevisRepository devisRepository;
     private final DetailsDevisRepository detailsDevisRepository;
+    private final DemandeRepository demandeRepository;
+    private final TypeDevisRepository typeDevisRepository;
+    private final StatusRepository statusRepository;
+    private final DemandeStatusRepository demandeStatusRepository;
     
     public List<Devis> findAll() {
         return devisRepository.findAllWithDetails();
     }
     
     public Devis findById(int id) {
-        return devisRepository.findById(id)
+        return devisRepository.findByIdWithDetails(id)
             .orElseThrow(() -> new RuntimeException("Devis non trouvé: " + id));
     }
     
-    public Devis save(Devis devis) {
-        return devisRepository.save(devis);
+    public List<DetailsDevis> getDetails(int devisId) {
+        return detailsDevisRepository.findByDevisId(devisId);
+    }
+    
+    /**
+     * Créer un devis complet avec détails et changement de statut
+     */
+    public Devis creerDevis(int demandeId, int typeDevisId, Integer statusId,
+                           List<DetailsDevis> details) {
+        
+        // Vérifier si la demande a déjà un devis
+        if (devisRepository.existsByDemandeId(demandeId)) {
+            throw new RuntimeException("Cette demande a déjà un devis");
+        }
+        
+        // Récupérer la demande
+        Demande demande = demandeRepository.findById(demandeId)
+            .orElseThrow(() -> new RuntimeException("Demande non trouvée"));
+        
+        // Récupérer le type de devis
+        TypeDevis typeDevis = typeDevisRepository.findById(typeDevisId)
+            .orElseThrow(() -> new RuntimeException("Type de devis non trouvé"));
+        
+        // Créer le devis
+        Devis devis = new Devis();
+        devis.setDateDevis(LocalDate.now());
+        devis.setDemande(demande);
+        devis.setTypeDevis(typeDevis);
+        
+        // Ajouter les détails
+        if (details != null && !details.isEmpty()) {
+            for (DetailsDevis detail : details) {
+                devis.addDetail(detail);
+            }
+        }
+        
+        // Calculer le total
+        devis.calculerMontantTotal();
+        
+        // Sauvegarder
+        Devis savedDevis = devisRepository.save(devis);
+        
+        // Changer le statut de la demande si spécifié
+        if (statusId != null) {
+            changerStatusDemande(demande, statusId, "Devis créé - Montant: " + devis.getMontantTotal() + " Ar");
+        }
+        
+        return savedDevis;
+    }
+    
+    /**
+     * Mettre à jour un devis existant
+     */
+    public Devis updateDevis(int devisId, int typeDevisId, Integer statusId,
+                            List<DetailsDevis> details) {
+        
+        Devis devis = findById(devisId);
+        
+        // Mettre à jour le type
+        TypeDevis typeDevis = typeDevisRepository.findById(typeDevisId)
+            .orElseThrow(() -> new RuntimeException("Type de devis non trouvé"));
+        devis.setTypeDevis(typeDevis);
+        
+        // Supprimer les anciens détails et ajouter les nouveaux
+        devis.getDetails().clear();
+        if (details != null && !details.isEmpty()) {
+            for (DetailsDevis detail : details) {
+                devis.addDetail(detail);
+            }
+        }
+        
+        // Recalculer le total
+        devis.calculerMontantTotal();
+        
+        // Sauvegarder
+        Devis savedDevis = devisRepository.save(devis);
+        
+        // Changer le statut si spécifié
+        if (statusId != null) {
+            changerStatusDemande(devis.getDemande(), statusId, 
+                "Devis modifié - Nouveau montant: " + devis.getMontantTotal() + " Ar");
+        }
+        
+        return savedDevis;
+    }
+    
+    private void changerStatusDemande(Demande demande, int statusId, String commentaire) {
+        Status status = statusRepository.findById(statusId)
+            .orElseThrow(() -> new RuntimeException("Status non trouvé"));
+        
+        DemandeStatus demandeStatus = new DemandeStatus();
+        demandeStatus.setDemande(demande);
+        demandeStatus.setStatus(status);
+        demandeStatus.setDateStatus(LocalDateTime.now());
+        demandeStatus.setCommentaire(commentaire);
+        
+        demandeStatusRepository.save(demandeStatus);
     }
     
     public void deleteById(int id) {
         devisRepository.deleteById(id);
     }
     
-    public DetailsDevis addDetail(int devisId, DetailsDevis detail) {
-        Devis devis = findById(devisId);
-        devis.addDetail(detail);
-        devisRepository.save(devis);
-        return detail;
-    }
-    
-    public void removeDetail(int devisId, int detailId) {
-        Devis devis = findById(devisId);
-        DetailsDevis detail = detailsDevisRepository.findById(detailId)
-            .orElseThrow(() -> new RuntimeException("Détail non trouvé"));
-        devis.removeDetail(detail);
-        devisRepository.save(devis);
-    }
-    
-    public List<DetailsDevis> getDetails(int devisId) {
-        return detailsDevisRepository.findByDevisId(devisId);
+    /**
+     * Obtenir les demandes sans devis (pour autocomplete)
+     */
+    public List<Demande> getDemandesSansDevis() {
+        return demandeRepository.findAllWithClientAndStatus()
+            .stream()
+            .filter(d -> !devisRepository.existsByDemandeId(d.getId()))
+            .toList();
     }
 }
