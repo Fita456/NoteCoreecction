@@ -17,7 +17,7 @@ if /i not "%CONFIRM%"=="O" (
 REM ============================================
 REM CONFIGURATION
 REM ============================================
-set PSQL_PATH=C:\Program Files\PostgreSQL\16\bin\psql.exe
+set PSQL_PATH=C:\Program Files\PostgreSQL\17\bin\psql.exe
 set PGUSER=postgres
 set PGPASSWORD=123
 set PGHOST=localhost
@@ -41,12 +41,12 @@ REM RÉINITIALISATION
 REM ============================================
 
 echo.
-echo [1/4] Suppression de la base existante...
+echo [1/2] Suppression de la base existante...
 "%PSQL_PATH%" -h %PGHOST% -p %PGPORT% -U %PGUSER% -c "DROP DATABASE IF EXISTS %DATABASE%;"
 echo [OK]
 
-echo [3/4] Import du schema...
-"%PSQL_PATH%" -h %PGHOST% -p %PGPORT% -U %PGUSER% -d %DATABASE% -f "%SQL_DIR%\forage.sql"
+echo [2/2] Import du schema...
+"%PSQL_PATH%" -h %PGHOST% -p %PGPORT% -U %PGUSER% -f "%SQL_DIR%\forage.sql"
 echo [OK]
 
 echo.

@@ -8,9 +8,9 @@ echo.
 REM ============================================
 REM CONFIGURATION
 REM ============================================
-set PSQL_PATH=C:\Program Files\PostgreSQL\16\bin\psql.exe
+set PSQL_PATH=C:\Program Files\PostgreSQL\17\bin\psql.exe
 set PGUSER=postgres
-set PGPASSWORD=postgres
+set PGPASSWORD=123
 set PGHOST=localhost
 set PGPORT=5432
 set DATABASE=forage
@@ -27,8 +27,8 @@ if not exist "%PSQL_PATH%" (
     exit /b 1
 )
 
-if not exist "%SQL_DIR%\02_data.sql" (
-    echo [ERREUR] Fichier non trouve : %SQL_DIR%\02_data.sql
+if not exist "%SQL_DIR%\DonnerEntre.sql" (
+    echo [ERREUR] Fichier non trouve : %SQL_DIR%\DonnerEntre.sql
     pause
     exit /b 1
 )

@@ -32,14 +32,14 @@ public class DetailsDevis {
     @Column(nullable = false)
     private int quantite;
     
-    @Column(precision = 15, scale = 2)
+    // insertable = false, updatable = false car la colonne est générée en base
+    @Column(name = "total", precision = 15, scale = 2, insertable = false, updatable = false)
     private BigDecimal total;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "devis_id", nullable = false)
     private Devis devis;
     
-    // Calculer le total automatiquement
     @PrePersist
     @PreUpdate
     public void calculerTotal() {

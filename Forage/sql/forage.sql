@@ -80,7 +80,19 @@ CREATE TABLE details_devis (
         ON DELETE CASCADE
 );
 
--- ============================================
+-- Vérifier d'abord la structure actuelle
+\d details_devis
+
+-- Si la colonne total est générée, modifiez-la
+ALTER TABLE details_devis 
+ALTER COLUMN total DROP DEFAULT,
+ALTER COLUMN total DROP GENERATED IF EXISTS;
+
+-- Assurez-vous que la colonne n'est pas NOT NULL
+ALTER TABLE details_devis 
+ALTER COLUMN total SET NOT NULL;
+
+-- ============================================v
 -- TABLE: demande_status
 -- ============================================
 CREATE TABLE demande_status (

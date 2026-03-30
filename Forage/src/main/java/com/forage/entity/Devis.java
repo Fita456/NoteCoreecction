@@ -38,41 +38,67 @@ public class Devis {
     @NotNull(message = "La demande est obligatoire")
     private Demande demande;
     
-    @OneToMany(mappedBy = "devis", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "devis", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<DetailsDevis> details = new ArrayList<>();
     
     // Recalculer le montant total
     public void calculerMontantTotal() {
+        if (details == null || details.isEmpty()) {
+            this.montantTotal = BigDecimal.ZERO;
+            return;
+        }
+        
         this.montantTotal = details.stream()
-            .map(d -> {
-                d.calculerTotal();
-                return d.getTotal();
+            .map(detail -> {
+                // Calculer le total du détail si nécessaire
+                if (detail.getTotal() == null && detail.getPrixUnitaire() != null && detail.getQuantite() > 0) {
+                    detail.calculerTotal();
+                }
+                return detail.getTotal() != null ? detail.getTotal() : BigDecimal.ZERO;
             })
-            .filter(t -> t != null)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
     
     // Ajouter un détail
     public void addDetail(DetailsDevis detail) {
-        details.add(detail);
-        detail.setDevis(this);
-        calculerMontantTotal();
+        if (detail != null) {
+            details.add(detail);
+            detail.setDevis(this);
+            // Calculer le total du détail
+            detail.calculerTotal();
+            // Recalculer le total du devis
+            calculerMontantTotal();
+        }
     }
     
     // Supprimer un détail
     public void removeDetail(DetailsDevis detail) {
-        details.remove(detail);
-        detail.setDevis(null);
-        calculerMontantTotal();
+        if (detail != null) {
+            details.remove(detail);
+            detail.setDevis(null);
+            calculerMontantTotal();
+        }
     }
     
     // Vider et ajouter tous les détails
     public void setAllDetails(List<DetailsDevis> newDetails) {
         this.details.clear();
-        if (newDetails != null) {
+        if (newDetails != null && !newDetails.isEmpty()) {
             for (DetailsDevis detail : newDetails) {
-                addDetail(detail);
+                detail.setDevis(this);
+                detail.calculerTotal();
+                this.details.add(detail);
             }
+            calculerMontantTotal();
+        } else {
+            this.montantTotal = BigDecimal.ZERO;
         }
+    }
+    
+    // Méthode utilitaire pour mettre à jour le montant total depuis les détails
+    @PrePersist
+    @PreUpdate
+    public void updateMontantTotal() {
+        calculerMontantTotal();
     }
 }

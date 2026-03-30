@@ -4,6 +4,13 @@
       layout:decorate="~{layout}">
 <head>
     <title>Détail Demande</title>
+    
+    <style>
+        .timeline {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
 </head>
 <body>
 <div layout:fragment="content">
@@ -33,23 +40,23 @@
                     <table class="table table-borderless">
                         <tr>
                             <th width="120">Date :</th>
-                            <td th:text="${#temporals.format(demande.dateDemande, 'dd/MM/yyyy')}"></td>
+                            <td th:text="${#temporals.format(demande.date, 'dd/MM/yyyy')}">-</td>
                         </tr>
                         <tr>
                             <th>Client :</th>
-                            <td th:text="${demande.client?.nom}"></td>
+                            <td th:text="${demande.client?.nom}">-</td>
                         </tr>
                         <tr>
                             <th>Contact :</th>
-                            <td th:text="${demande.client?.contact}"></td>
+                            <td th:text="${demande.client?.contact}">-</td>
                         </tr>
                         <tr>
                             <th>Lieu :</th>
-                            <td th:text="${demande.lieu}"></td>
+                            <td th:text="${demande.lieu}">-</td>
                         </tr>
                         <tr>
                             <th>District :</th>
-                            <td th:text="${demande.district}"></td>
+                            <td th:text="${demande.district}">-</td>
                         </tr>
                         <tr>
                             <th>Statut actuel :</th>
@@ -68,7 +75,7 @@
                 </div>
                 <div class="card-body">
                     <div th:if="${demande.devis != null}">
-                        <p>Montant : <strong th:text="${#numbers.formatDecimal(demande.devis.montantTotal, 0, 'COMMA', 0, 'POINT')} + ' Ar'"></strong></p>
+                        <p>Montant : <strong th:text="${demande.devis.montantTotal} + ' Ar'"></strong></p>
                         <a th:href="@{/devis/{id}(id=${demande.devis.id})}" class="btn btn-info">
                             <i class="bi bi-eye"></i> Voir le devis
                         </a>

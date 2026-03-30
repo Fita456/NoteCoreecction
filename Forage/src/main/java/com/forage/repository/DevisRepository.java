@@ -2,10 +2,13 @@ package com.forage.repository;
 
 import com.forage.entity.Devis;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,4 +33,9 @@ public interface DevisRepository extends JpaRepository<Devis, Integer> {
     Optional<Devis> findByDemandeId(int demandeId);
     
     boolean existsByDemandeId(int demandeId);
+    
+    @Modifying
+    @Transactional
+    @Query("UPDATE Devis d SET d.montantTotal = :montantTotal WHERE d.id = :id")
+    void updateMontantTotal(@Param("id") int id, @Param("montantTotal") BigDecimal montantTotal);
 }

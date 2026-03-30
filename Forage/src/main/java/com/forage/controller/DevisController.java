@@ -137,7 +137,6 @@ public class DevisController {
                         detail.setLibelle(libelles.get(i));
                         detail.setPrixUnitaire(prixUnitaires.get(i));
                         detail.setQuantite(quantites.get(i));
-                        detail.calculerTotal();
                         details.add(detail);
                     }
                 }
