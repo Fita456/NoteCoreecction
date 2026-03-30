@@ -1,63 +1,57 @@
-
 @echo off
 chcp 65001 > nul
 echo ╔════════════════════════════════════════════════════════════╗
-echo ║         SUPPRESSION DES DONNÉES (TABLES VIDÉES)            ║
+echo ║         RÉINITIALISATION DE LA BASE DE DONNÉES             ║
 echo ╚════════════════════════════════════════════════════════════╝
 echo.
+echo ATTENTION : Cette operation va supprimer toutes les donnees !
+echo.
 
-REM Chemin MariaDB dans XAMPP
-set MYSQL_PATH=C:\xampp\mysql\bin\mysql.exe
+set /p CONFIRM="Etes-vous sur de vouloir continuer ? (O/N) : "
+if /i not "%CONFIRM%"=="O" (
+    echo Annule.
+    pause
+    exit /b 0
+)
 
-REM Dossier SQL
+REM ============================================
+REM CONFIGURATION
+REM ============================================
+set PSQL_PATH=C:\Program Files\PostgreSQL\16\bin\psql.exe
+set PGUSER=postgres
+set PGPASSWORD=123
+set PGHOST=localhost
+set PGPORT=5432
+set DATABASE=forage
+
 set SQL_DIR=%~dp0sql
 
-REM Vérifications
-if not exist "%MYSQL_PATH%" (
-    echo [ERREUR] MySQL non trouve a : %MYSQL_PATH%
+REM ============================================
+REM VÉRIFICATIONS
+REM ============================================
+
+if not exist "%PSQL_PATH%" (
+    echo [ERREUR] psql non trouve
     pause
     exit /b 1
 )
 
-if not exist "%SQL_DIR%\DonnerSuprimer.sql" (
-    echo [ERREUR] Fichier SQL non trouve : %SQL_DIR%\DonnerSuprimer.sql
-    pause
-    exit /b 1
-)
-
-
-
-set /p confirm="Etes-vous sur de vouloir continuer ? (O/N) : "
-
-if /i "%confirm%"=="O" goto SUPPRIMER
-if /i "%confirm%"=="OUI" goto SUPPRIMER
+REM ============================================
+REM RÉINITIALISATION
+REM ============================================
 
 echo.
-echo Operation annulee.
-pause
-exit /b 0
+echo [1/4] Suppression de la base existante...
+"%PSQL_PATH%" -h %PGHOST% -p %PGPORT% -U %PGUSER% -c "DROP DATABASE IF EXISTS %DATABASE%;"
+echo [OK]
 
-:SUPPRIMER
-echo.
-echo Suppression des donnees en cours...
-echo.
-
-"%MYSQL_PATH%" -u root < "%SQL_DIR%\DonnerSuprimer.sql"
-
-if %ERRORLEVEL% NEQ 0 (
-    echo [ERREUR] Echec de la suppression
-    pause
-    exit /b 1
-)
+echo [3/4] Import du schema...
+"%PSQL_PATH%" -h %PGHOST% -p %PGPORT% -U %PGUSER% -d %DATABASE% -f "%SQL_DIR%\forage.sql"
+echo [OK]
 
 echo.
-echo ════════════════════════════════════════════════════════════════
-echo   SUPPRESSION TERMINEE
-echo ════════════════════════════════════════════════════════════════
-echo.
-echo   Toutes les donnees ont ete supprimees.
-echo   Les tables et la structure de la base sont conservees.
-echo.
+echo ╔════════════════════════════════════════════════════════════╗
+echo ║         RÉINITIALISATION TERMINÉE !                        ║
+echo ╚════════════════════════════════════════════════════════════╝
 echo.
 pause
-exit /b 0
