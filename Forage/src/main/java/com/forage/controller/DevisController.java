@@ -1,19 +1,24 @@
 package com.forage.controller;
 
-import com.forage.entity.Devis;
+import com.forage.entity.Demande;
 import com.forage.entity.DetailsDevis;
+import com.forage.entity.Devis;
 import com.forage.service.DemandeService;
 import com.forage.service.DevisService;
-import com.forage.repository.TypeDevisRepository;
-import jakarta.validation.Valid;
+import com.forage.service.StatusService;
+import com.forage.service.TypeDevisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/devis")
@@ -22,7 +27,8 @@ public class DevisController {
     
     private final DevisService devisService;
     private final DemandeService demandeService;
-    private final TypeDevisRepository typeDevisRepository;
+    private final TypeDevisService typeDevisService;
+    private final StatusService statusService;
     
     @GetMapping
     public String list(Model model) {
@@ -31,41 +37,124 @@ public class DevisController {
     }
     
     @GetMapping("/new")
-    public String createForm(@RequestParam(required = false) int demandeId, Model model) {
-        Devis devis = new Devis();
-        devis.setDate(LocalDate.now());
-        
-        if (demandeId != 0) {
-            devis.setDemande(demandeService.findById(demandeId));
-        }
-        
-        model.addAttribute("devis", devis);
-        model.addAttribute("demandes", demandeService.findAll());
-        model.addAttribute("typesDevis", typeDevisRepository.findAll());
+    public String createForm(@RequestParam(required = false) Integer demandeId, Model model) {
+        model.addAttribute("demandesSansDevis", devisService.getDemandesSansDevis());
+        model.addAttribute("typesDevis", typeDevisService.findAll());
+        model.addAttribute("statuses", statusService.findAll());
+        model.addAttribute("selectedDemandeId", demandeId);
         return "devis/form";
     }
     
-    @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable int id, Model model) {
-        model.addAttribute("devis", devisService.findById(id));
-        model.addAttribute("demandes", demandeService.findAll());
-        model.addAttribute("typesDevis", typeDevisRepository.findAll());
-        return "devis/form";
+    // ==================== API AUTOCOMPLETE - INFOS COMPLÈTES ====================
+    
+    @GetMapping("/api/demandes")
+    @ResponseBody
+    public List<Map<String, Object>> searchDemandes(@RequestParam(required = false) String q) {
+        List<Demande> demandes = devisService.getDemandesSansDevis();
+        List<Map<String, Object>> result = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        
+        for (Demande d : demandes) {
+            // Filtrer par recherche
+            if (q == null || q.isEmpty() || 
+                d.getLieu().toLowerCase().contains(q.toLowerCase()) ||
+                d.getClient().getNom().toLowerCase().contains(q.toLowerCase()) ||
+                d.getDistrict().toLowerCase().contains(q.toLowerCase())) {
+                
+                Map<String, Object> item = new HashMap<>();
+                
+                // ID Demande
+                item.put("id", d.getId());
+                
+                // Infos Demande
+                item.put("dateDemande", d.getDate().format(formatter));
+                item.put("lieu", d.getLieu());
+                item.put("district", d.getDistrict());
+                
+                // Infos Client
+                item.put("clientId", d.getClient().getId());
+                item.put("clientNom", d.getClient().getNom());
+                item.put("clientContact", d.getClient().getContact());
+                
+                // Statut actuel
+                item.put("statut", d.getDernierStatusLibelle());
+                
+                // Label pour autocomplete
+                item.put("label", d.getClient().getNom() + " - " + d.getLieu());
+                
+                result.add(item);
+            }
+        }
+        
+        return result;
     }
+    
+    // ==================== API - OBTENIR DÉTAILS D'UNE DEMANDE ====================
+    
+    @GetMapping("/api/demandes/{id}")
+    @ResponseBody
+    public Map<String, Object> getDemandeDetails(@PathVariable int id) {
+        Demande d = demandeService.findById(id);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        
+        Map<String, Object> result = new HashMap<>();
+        
+        // Infos Demande
+        result.put("id", d.getId());
+        result.put("dateDemande", d.getDate().format(formatter));
+        result.put("lieu", d.getLieu());
+        result.put("district", d.getDistrict());
+        result.put("statut", d.getDernierStatusLibelle());
+        
+        // Infos Client
+        Map<String, Object> client = new HashMap<>();
+        client.put("id", d.getClient().getId());
+        client.put("nom", d.getClient().getNom());
+        client.put("contact", d.getClient().getContact());
+        result.put("client", client);
+        
+        return result;
+    }
+    
+    // ==================== ENREGISTREMENT ====================
     
     @PostMapping("/save")
-    public String save(@Valid @ModelAttribute Devis devis,
-                       BindingResult result,
-                       Model model,
+    public String save(@RequestParam int demandeId,
+                       @RequestParam int typeDevisId,
+                       @RequestParam(required = false) Integer statusId,
+                       @RequestParam(required = false) List<String> libelles,
+                       @RequestParam(required = false) List<BigDecimal> prixUnitaires,
+                       @RequestParam(required = false) List<Integer> quantites,
+                       @RequestParam(required = false) Integer devisId,
                        RedirectAttributes redirectAttributes) {
-        if (result.hasErrors()) {
-            model.addAttribute("demandes", demandeService.findAll());
-            model.addAttribute("typesDevis", typeDevisRepository.findAll());
-            return "devis/form";
+        
+        try {
+            List<DetailsDevis> details = new ArrayList<>();
+            if (libelles != null && !libelles.isEmpty()) {
+                for (int i = 0; i < libelles.size(); i++) {
+                    if (libelles.get(i) != null && !libelles.get(i).trim().isEmpty()) {
+                        DetailsDevis detail = new DetailsDevis();
+                        detail.setLibelle(libelles.get(i));
+                        detail.setPrixUnitaire(prixUnitaires.get(i));
+                        detail.setQuantite(quantites.get(i));
+                        details.add(detail);
+                    }
+                }
+            }
+            
+            if (devisId != null && devisId > 0) {
+                devisService.updateDevis(devisId, typeDevisId, statusId, details);
+                redirectAttributes.addFlashAttribute("success", "Devis mis à jour");
+            } else {
+                devisService.creerDevis(demandeId, typeDevisId, statusId, details);
+                redirectAttributes.addFlashAttribute("success", "Devis créé avec succès");
+            }
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Erreur: " + e.getMessage());
+            return "redirect:/devis/new";
         }
         
-        devisService.save(devis);
-        redirectAttributes.addFlashAttribute("success", "Devis enregistré avec succès");
         return "redirect:/devis";
     }
     
@@ -74,32 +163,17 @@ public class DevisController {
         Devis devis = devisService.findById(id);
         model.addAttribute("devis", devis);
         model.addAttribute("details", devisService.getDetails(id));
-        model.addAttribute("newDetail", new DetailsDevis());
         return "devis/view";
     }
     
-    @PostMapping("/{id}/details")
-    public String addDetail(@PathVariable int id,
-                            @Valid @ModelAttribute("newDetail") DetailsDevis detail,
-                            BindingResult result,
-                            RedirectAttributes redirectAttributes) {
-        if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("error", "Données invalides");
-            return "redirect:/devis/" + id;
-        }
-        
-        devisService.addDetail(id, detail);
-        redirectAttributes.addFlashAttribute("success", "Détail ajouté");
-        return "redirect:/devis/" + id;
-    }
-    
-    @GetMapping("/{id}/details/{detailId}/delete")
-    public String deleteDetail(@PathVariable int id,
-                               @PathVariable int detailId,
-                               RedirectAttributes redirectAttributes) {
-        devisService.removeDetail(id, detailId);
-        redirectAttributes.addFlashAttribute("success", "Détail supprimé");
-        return "redirect:/devis/" + id;
+    @GetMapping("/{id}/edit")
+    public String editForm(@PathVariable int id, Model model) {
+        Devis devis = devisService.findById(id);
+        model.addAttribute("devis", devis);
+        model.addAttribute("details", devisService.getDetails(id));
+        model.addAttribute("typesDevis", typeDevisService.findAll());
+        model.addAttribute("statuses", statusService.findAll());
+        return "devis/edit";
     }
     
     @GetMapping("/{id}/delete")

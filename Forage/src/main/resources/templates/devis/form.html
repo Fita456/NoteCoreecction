@@ -1,78 +1,293 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title layout:title-pattern="$CONTENT_TITLE - Forage">Forage</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    
-    <!-- CSS Personnalisé -->
-    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <title>Nouveau Devis</title>
+    <style>
+        /* Tableau éditable */
+        .editable-table td {
+            cursor: pointer;
+            padding: 8px 12px;
+            transition: background-color 0.2s;
+        }
+        .editable-table td:hover { background-color: #e3f2fd; }
+        .editable-table td.editing { padding: 0; background-color: #fff3cd; }
+        .editable-table td.editing input {
+            width: 100%;
+            border: 2px solid #007bff;
+            padding: 8px 12px;
+        }
+        .cell-placeholder { color: #aaa; font-style: italic; }
+        .total-cell { font-weight: bold; color: #28a745; background-color: #d4edda !important; }
+        
+        /* Récapitulatif */
+        .recap-card {
+            position: sticky;
+            top: 20px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .recap-section {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .recap-section:last-child { border-bottom: none; }
+        .recap-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #6c757d;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .recap-section-title i { margin-right: 5px; }
+        .recap-label { color: #6c757d; font-size: 0.85rem; }
+        .recap-value { font-weight: 500; }
+        .recap-total-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .recap-total-value { font-size: 1.8rem; font-weight: bold; }
+        .recap-empty { color: #aaa; font-style: italic; font-size: 0.9rem; }
+        
+        /* Autocomplete */
+        .autocomplete-results {
+            position: absolute;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 250px;
+            overflow-y: auto;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .autocomplete-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .autocomplete-item:hover { background-color: #f8f9fa; }
+        
+        /* Bouton ajouter */
+        .btn-add-row {
+            border: 2px dashed #28a745;
+            color: #28a745;
+            background: transparent;
+            width: 100%;
+            padding: 10px;
+        }
+        .btn-add-row:hover { background: #28a745; color: white; }
+    </style>
 </head>
 <body>
-    <div class="container-fluid p-0">
-        <div class="row g-0">
-            
-            <!-- Sidebar -->
-            <nav class="col-md-2 sidebar">
-                <div class="logo">
-                    <h4><i class="bi bi-water"></i> Forage</h4>
-                </div>
-                
-                <a th:href="@{/}">
-                    <i class="bi bi-house-door"></i> Accueil
-                </a>
-                <a th:href="@{/clients}">
-                    <i class="bi bi-people"></i> Clients
-                </a>
-                <a th:href="@{/demandes}">
-                    <i class="bi bi-file-text"></i> Demandes
-                </a>
-                <a th:href="@{/devis}">
-                    <i class="bi bi-receipt"></i> Devis
-                </a>
-                
-                <hr>
-                
-                <a th:href="@{/bases}">
-                    <i class="bi bi-gear"></i> Données de Base
-                </a>
-            </nav>
-            
-            <!-- Contenu Principal -->
-            <main class="col-md-10 content">
-                
-                <!-- Alertes -->
-                <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
-                    <i class="bi bi-check-circle me-2"></i>
-                    <span th:text="${success}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                
-                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-                    <span th:text="${error}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                
-                <!-- Contenu de la page -->
-                <div layout:fragment="content"></div>
-                
-            </main>
-        </div>
-    </div>
+<div layout:fragment="content">
+    <h2><i class="bi bi-receipt"></i> Nouveau Devis</h2>
     
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <form id="devisForm" th:action="@{/devis/save}" method="post">
+        
+        <div class="row">
+            
+            <!-- ==================== COLONNE GAUCHE ==================== -->
+            <div class="col-md-4">
+                
+                <!-- Formulaire -->
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-pencil"></i> Informations
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Demande (Autocomplete) -->
+                        <div class="mb-3">
+                            <label class="form-label">Demande *</label>
+                            <div class="position-relative">
+                                <input type="text" id="demandeSearch" class="form-control" 
+                                       placeholder="🔍 Rechercher client ou lieu..." autocomplete="off">
+                                <input type="hidden" name="demandeId" id="demandeId" required>
+                                <div id="demandeResults" class="autocomplete-results" style="display: none;"></div>
+                            </div>
+                            <div id="selectedDemande" class="mt-2 p-2 bg-success bg-opacity-10 rounded" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span id="selectedDemandeText" class="small text-success fw-bold"></span>
+                                    <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="clearDemande()">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Type de Devis -->
+                        <div class="mb-3">
+                            <label class="form-label">Type de Devis *</label>
+                            <select name="typeDevisId" id="typeDevisId" class="form-select" required onchange="updateRecap()">
+                                <option value="">-- Sélectionner --</option>
+                                <option th:each="t : ${typesDevis}" 
+                                        th:value="${t.id}" 
+                                        th:text="${t.libelle}"
+                                        th:data-libelle="${t.libelle}"></option>
+                            </select>
+                        </div>
+                        
+                        <!-- Statut -->
+                        <div class="mb-3">
+                            <label class="form-label">Changer le Statut</label>
+                            <select name="statusId" id="statusId" class="form-select" onchange="updateRecap()">
+                                <option value="">-- Ne pas changer --</option>
+                                <option th:each="s : ${statuses}" 
+                                        th:value="${s.id}" 
+                                        th:text="${s.libelle}"
+                                        th:data-libelle="${s.libelle}"></option>
+                            </select>
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i> Ajouté à l'historique
+                            </small>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <!-- ==================== RÉCAPITULATIF ==================== -->
+                <div class="card recap-card">
+                    <div class="card-header bg-dark text-white">
+                        <i class="bi bi-file-text"></i> RÉCAPITULATIF
+                    </div>
+                    
+                    <!-- Section Client -->
+                    <div class="recap-section" id="recapClientSection">
+                        <div class="recap-section-title">
+                            <i class="bi bi-person"></i> Client
+                        </div>
+                        <div id="recapClient">
+                            <span class="recap-empty">Sélectionnez une demande...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Section Demande -->
+                    <div class="recap-section" id="recapDemandeSection">
+                        <div class="recap-section-title">
+                            <i class="bi bi-file-earmark"></i> Demande
+                        </div>
+                        <div id="recapDemande">
+                            <span class="recap-empty">Sélectionnez une demande...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Section Devis -->
+                    <div class="recap-section">
+                        <div class="recap-section-title">
+                            <i class="bi bi-receipt"></i> Devis
+                        </div>
+                        <div id="recapDevis">
+                            <div class="row">
+                                <div class="col-6">
+                                    <span class="recap-label">Type:</span><br>
+                                    <span class="recap-value" id="recapTypeDevis">-</span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="recap-label">Nouveau statut:</span><br>
+                                    <span class="recap-value" id="recapStatut">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section Détails -->
+                    <div class="recap-section">
+                        <div class="recap-section-title">
+                            <i class="bi bi-list-ul"></i> Détails
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="recap-label">Lignes</div>
+                                <div class="fs-4 fw-bold text-primary" id="recapNbLignes">0</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="recap-label">Articles</div>
+                                <div class="fs-4 fw-bold text-info" id="recapNbArticles">0</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="recap-label">Sous-total</div>
+                                <div class="fs-6 fw-bold text-secondary" id="recapSousTotal">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section Total -->
+                    <div class="recap-total-section">
+                        <div class="small opacity-75 mb-1">MONTANT TOTAL</div>
+                        <div class="recap-total-value" id="recapTotal">0 Ar</div>
+                    </div>
+                    
+                </div>
+                
+            </div>
+            
+            <!-- ==================== COLONNE DROITE - TABLEAU ==================== -->
+            <div class="col-md-8">
+                
+                <div class="card">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-table"></i> Détails du Devis</span>
+                        <button type="button" class="btn btn-light btn-sm" onclick="ajouterLigne()">
+                            <i class="bi bi-plus"></i> Ajouter
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-bordered editable-table mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th width="40">#</th>
+                                    <th>Libellé</th>
+                                    <th width="120">Prix Unit.</th>
+                                    <th width="70">Qté</th>
+                                    <th width="130">Total</th>
+                                    <th width="50"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailsBody"></tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="6" class="p-0">
+                                        <button type="button" class="btn-add-row" onclick="ajouterLigne()">
+                                            <i class="bi bi-plus-circle"></i> Cliquez pour ajouter une ligne
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="table-success">
+                                    <th colspan="4" class="text-end">TOTAL:</th>
+                                    <th id="tableTotal">0 Ar</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Boutons -->
+                <div class="d-flex gap-2 mt-3 justify-content-end">
+                    <a th:href="@{/devis}" class="btn btn-secondary btn-lg">
+                        <i class="bi bi-x"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-lg"></i> Enregistrer le Devis
+                    </button>
+                </div>
+                
+            </div>
+            
+        </div>
+        
+        <!-- Inputs cachés -->
+        <div id="hiddenInputs"></div>
+        
+    </form>
+</div>
 
-    <script th:inline="javascript">
-     // ==================== DONNÉES ====================
+<script th:inline="javascript">
+    // ==================== DONNÉES ====================
     let ligneIndex = 0;
     let tableData = [];
     let selectedDemandeData = null; // Stocke les infos de la demande sélectionnée

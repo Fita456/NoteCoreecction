@@ -1,78 +1,4 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title layout:title-pattern="$CONTENT_TITLE - Forage">Forage</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    
-    <!-- CSS Personnalisé -->
-    <link th:href="@{/css/style.css}" rel="stylesheet">
-</head>
-<body>
-    <div class="container-fluid p-0">
-        <div class="row g-0">
-            
-            <!-- Sidebar -->
-            <nav class="col-md-2 sidebar">
-                <div class="logo">
-                    <h4><i class="bi bi-water"></i> Forage</h4>
-                </div>
-                
-                <a th:href="@{/}">
-                    <i class="bi bi-house-door"></i> Accueil
-                </a>
-                <a th:href="@{/clients}">
-                    <i class="bi bi-people"></i> Clients
-                </a>
-                <a th:href="@{/demandes}">
-                    <i class="bi bi-file-text"></i> Demandes
-                </a>
-                <a th:href="@{/devis}">
-                    <i class="bi bi-receipt"></i> Devis
-                </a>
-                
-                <hr>
-                
-                <a th:href="@{/bases}">
-                    <i class="bi bi-gear"></i> Données de Base
-                </a>
-            </nav>
-            
-            <!-- Contenu Principal -->
-            <main class="col-md-10 content">
-                
-                <!-- Alertes -->
-                <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
-                    <i class="bi bi-check-circle me-2"></i>
-                    <span th:text="${success}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                
-                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-                    <span th:text="${error}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                
-                <!-- Contenu de la page -->
-                <div layout:fragment="content"></div>
-                
-            </main>
-        </div>
-    </div>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script th:inline="javascript">
-     // ==================== DONNÉES ====================
+// ==================== DONNÉES ====================
     let ligneIndex = 0;
     let tableData = [];
     let selectedDemandeData = null; // Stocke les infos de la demande sélectionnée
@@ -410,6 +336,3 @@
         
         updateHiddenInputs();
     });
-</script>
-</body>
-</html>

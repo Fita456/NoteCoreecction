@@ -5,31 +5,53 @@ echo ║         IMPORTATION DES DONNÉES DE TEST                    ║
 echo ╚════════════════════════════════════════════════════════════╝
 echo.
 
-REM Chemin MariaDB dans XAMPP (modifiez si nécessaire)
-set MYSQL_PATH=C:\xampp\mysql\bin\mysql.exe
+REM ============================================
+REM CONFIGURATION
+REM ============================================
+set PSQL_PATH=C:\Program Files\PostgreSQL\17\bin\psql.exe
+set PGUSER=postgres
+set PGPASSWORD=123
+set PGHOST=localhost
+set PGPORT=5432
+set DATABASE=forage
 
-REM Dossier contenant les fichiers SQL
 set SQL_DIR=%~dp0sql
 
-REM Vérifier si MySQL existe
-if not exist "%MYSQL_PATH%" (
-    echo [ERREUR] MySQL non trouve a : %MYSQL_PATH%
-    echo Veuillez modifier le chemin dans ce fichier.
+REM ============================================
+REM VÉRIFICATIONS
+REM ============================================
+
+if not exist "%PSQL_PATH%" (
+    echo [ERREUR] psql non trouve a : %PSQL_PATH%
     pause
     exit /b 1
 )
 
-REM Vérifier si le dossier sql existe
-if not exist "%SQL_DIR%" (
-    echo [ERREUR] Dossier sql non trouve : %SQL_DIR%
-    echo Veuillez creer le dossier sql avec les fichiers .sql
+if not exist "%SQL_DIR%\DonnerEntre.sql" (
+    echo [ERREUR] Fichier non trouve : %SQL_DIR%\DonnerEntre.sql
     pause
     exit /b 1
 )
 
-REM Importer les fichiers SQL
-mysql -u root < "%SQL_DIR%\DonnerEntre.sql"
+REM ============================================
+REM IMPORT
+REM ============================================
+
+echo Import des donnees dans la base %DATABASE%...
+echo.
+
+"%PSQL_PATH%" -h %PGHOST% -p %PGPORT% -U %PGUSER% -d %DATABASE% -f "%SQL_DIR%\DonnerEntre.sql"
+
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo [ERREUR] Erreur lors de l'import
+    pause
+    exit /b 1
+)
 
 echo.
-echo Importation terminee avec succes !
+echo ╔════════════════════════════════════════════════════════════╗
+echo ║         IMPORTATION TERMINÉE AVEC SUCCÈS !                 ║
+echo ╚════════════════════════════════════════════════════════════╝
+echo.
 pause
