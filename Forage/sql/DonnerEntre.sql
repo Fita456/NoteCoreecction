@@ -7,25 +7,16 @@
 -- STATUS
 -- ============================================
 INSERT INTO status (libelle) VALUES 
-    ('En attente'),
-    ('En cours d''étude'),
-    ('Devis envoyé'),
-    ('Validé'),
-    ('En cours de réalisation'),
-    ('Terminé'),
-    ('Rejeté'),
-    ('Annulé');
+    ('Cree'),
+    ('Devis_Etude_Cree'),
+    ('Devis_Forage_Cree');
 
 -- ============================================
 -- TYPES DE DEVIS
 -- ============================================
 INSERT INTO types_devis (libelle) VALUES 
-    ('Forage simple (0-30m)'),
-    ('Forage moyen (30-60m)'),
-    ('Forage profond (60m+)'),
-    ('Réhabilitation'),
-    ('Entretien'),
-    ('Étude de faisabilité');
+    ('Forage'),
+    ('Etude');
 
 -- ============================================
 -- CLIENTS
@@ -62,43 +53,33 @@ INSERT INTO demandes (date_demande, lieu, district, client_id) VALUES
 -- ============================================
 INSERT INTO demande_status (date_status, demande_id, status_id, commentaire) VALUES 
     -- Demande 1 : Terminée
-    ('2024-01-10 08:00:00', 1, 1, 'Demande reçue'),
-    ('2024-01-12 09:30:00', 1, 2, 'Étude en cours'),
-    ('2024-01-18 14:00:00', 1, 3, 'Devis envoyé'),
-    ('2024-01-22 10:00:00', 1, 4, 'Devis accepté'),
-    ('2024-01-25 07:00:00', 1, 5, 'Travaux démarrés'),
-    ('2024-02-15 16:00:00', 1, 6, 'Forage terminé - 25m'),
+    ('2024-01-10 08:00:00', 1, 1, 'Demande Cree'),
+    ('2024-01-12 09:30:00', 1, 2, 'Devis Etude'),
+    ('2024-01-18 14:00:00', 1, 3, 'Devis Forage'),
     
     -- Demande 2 : Terminée
-    ('2024-01-15 09:00:00', 2, 1, 'Demande reçue'),
-    ('2024-01-20 11:00:00', 2, 2, 'Visite terrain'),
-    ('2024-01-25 15:30:00', 2, 3, 'Devis transmis'),
-    ('2024-02-01 09:00:00', 2, 4, 'Validation budget'),
-    ('2024-02-05 06:30:00', 2, 5, 'Équipe sur place'),
-    ('2024-02-28 17:00:00', 2, 6, 'Travaux achevés'),
+    ('2024-01-15 09:00:00', 2, 1, 'Demande Cree'),
+    ('2024-01-20 11:00:00', 2, 2, 'Devis Etude'),
+    ('2024-01-25 15:30:00', 2, 3, 'Devis Forage'),
     
     -- Demande 3 : En cours
-    ('2024-02-01 10:00:00', 3, 1, 'Demande urgente'),
-    ('2024-02-03 14:00:00', 3, 2, 'Étude prioritaire'),
-    ('2024-02-08 11:00:00', 3, 3, 'Devis express'),
-    ('2024-02-10 16:00:00', 3, 4, 'Accord JIRAMA'),
-    ('2024-02-12 07:00:00', 3, 5, 'Travaux en cours - 40m'),
+    ('2024-02-01 10:00:00', 3, 1, 'Demande Cree'),
+    ('2024-02-03 14:00:00', 3, 2, 'Devis Etude'),
+    ('2024-02-08 11:00:00', 3, 3, 'Devis Forage'),
     
     -- Demande 4 : Devis envoyé
-    ('2024-02-10 08:30:00', 4, 1, 'Demande ONG'),
-    ('2024-02-14 10:00:00', 4, 2, 'Étude faisabilité'),
-    ('2024-02-20 15:00:00', 4, 3, 'Devis détaillé envoyé'),
+    ('2024-02-10 08:30:00', 4, 1, 'Demande Cree'),
+    ('2024-02-14 10:00:00', 4, 2, 'Devis Etude'),
+    ('2024-02-20 15:00:00', 4, 3, 'Devis Forage'),
     
     -- Demande 5 : En étude
-    ('2024-02-15 09:00:00', 5, 1, 'Demande reçue'),
-    ('2024-02-18 11:30:00', 5, 2, 'Analyse géologique'),
+    ('2024-02-15 09:00:00', 5, 1, 'Demande Cree'),
+    ('2024-02-18 11:30:00', 5, 2, 'Devis Etude'),
     
     -- Demandes 6-10 : En attente
-    ('2024-02-20 14:00:00', 6, 1, 'Nouvelle demande'),
-    ('2024-02-25 10:00:00', 7, 1, 'Demande humanitaire'),
-    ('2024-03-01 08:00:00', 8, 1, 'Demande urgente hôpital'),
-    ('2024-03-05 11:00:00', 9, 1, 'Demande école'),
-    ('2024-03-10 09:00:00', 10, 1, 'Demande ministérielle');
+    ('2024-02-20 14:00:00', 6, 1, 'Demande Cree'),
+    ('2024-02-25 10:00:00', 7, 1, 'Demande Cree'),
+    ('2024-03-01 08:00:00', 8, 1, 'Demande Cree');
 
 -- ============================================
 -- DEVIS
