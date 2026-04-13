@@ -63,6 +63,8 @@ CREATE TABLE devis (
         ON DELETE CASCADE
 );
 
+SELECT SUM(montant_total) FROM Devis;
+
 -- ============================================
 -- TABLE: details_devis
 -- ============================================
@@ -112,3 +114,4 @@ CREATE TABLE demande_status (
         REFERENCES status(id) 
         ON DELETE RESTRICT
 );
+

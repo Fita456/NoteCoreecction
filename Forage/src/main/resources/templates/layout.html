@@ -337,13 +337,21 @@
         let totalGeneral = 0;
         let nbArticles = 0;
         let nbLignes = 0;
+        let pourcentage = 0.1;
         
         tableData.forEach(row => {
             if (row.libelle && row.libelle.trim() !== '') {
-                const total = (row.prixUnitaire || 0) * (row.quantite || 0);
-                totalGeneral += total;
-                nbArticles += row.quantite || 0;
-                nbLignes++;
+                if(row.prixUnitaire >= 1000000){
+                    const total = ((row.prixUnitaire - (row.prixUnitaire * pourcentage)) || 0) * (row.quantite || 0);
+                    totalGeneral += total;
+                    nbArticles += row.quantite || 0;
+                    nbLignes++;
+                }else if(row.prixUnitaire < 1000000){
+                    const total = (row.prixUnitaire || 0) * (row.quantite || 0);
+                    totalGeneral += total;
+                    nbArticles += row.quantite || 0;
+                    nbLignes++;
+                }
             }
         });
         

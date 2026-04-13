@@ -33,6 +33,7 @@ public class DevisController {
     @GetMapping
     public String list(Model model) {
         model.addAttribute("devisList", devisService.findAll());
+        model.addAttribute("devisTotal", devisService.motantDevisTotal());
         return "devis/list";
     }
     
@@ -128,17 +129,34 @@ public class DevisController {
                        @RequestParam(required = false) Integer devisId,
                        RedirectAttributes redirectAttributes) {
         
+        
         try {
             List<DetailsDevis> details = new ArrayList<>();
             if (libelles != null && !libelles.isEmpty()) {
                 for (int i = 0; i < libelles.size(); i++) {
-                    if (libelles.get(i) != null && !libelles.get(i).trim().isEmpty()) {
-                        DetailsDevis detail = new DetailsDevis();
-                        detail.setLibelle(libelles.get(i));
-                        detail.setPrixUnitaire(prixUnitaires.get(i));
-                        detail.setQuantite(quantites.get(i));
-                        details.add(detail);
+                    BigDecimal decimal = new BigDecimal(1000000);
+                    BigDecimal de = new BigDecimal(0.1);
+                    int result = prixUnitaires.get(i).compareTo(decimal);
+                    BigDecimal max = prixUnitaires.get(i).multiply(de);
+                    BigDecimal fin = prixUnitaires.get(i).subtract(max);
+                    if (result >= 0) {
+                        if (libelles.get(i) != null && !libelles.get(i).trim().isEmpty()) {
+                            DetailsDevis detail = new DetailsDevis();
+                            detail.setLibelle(libelles.get(i));
+                            detail.setPrixUnitaire(fin);
+                            detail.setQuantite(quantites.get(i));
+                            details.add(detail);
+                        }
+                    }else if (result < 0) {
+                        if (libelles.get(i) != null && !libelles.get(i).trim().isEmpty()) {
+                            DetailsDevis detail = new DetailsDevis();
+                            detail.setLibelle(libelles.get(i));
+                            detail.setPrixUnitaire(prixUnitaires.get(i));
+                            detail.setQuantite(quantites.get(i));
+                            details.add(detail);
+                        } 
                     }
+                    
                 }
             }
             

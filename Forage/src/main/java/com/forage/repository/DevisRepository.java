@@ -38,4 +38,7 @@ public interface DevisRepository extends JpaRepository<Devis, Integer> {
     @Transactional
     @Query("UPDATE Devis d SET d.montantTotal = :montantTotal WHERE d.id = :id")
     void updateMontantTotal(@Param("id") int id, @Param("montantTotal") BigDecimal montantTotal);
+
+    @Query("SELECT SUM(montantTotal) FROM Devis")
+    BigDecimal MontantDevisTotal();
 }

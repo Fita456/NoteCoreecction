@@ -141,4 +141,9 @@ public Devis updateDevis(int devisId, int typeDevisId, Integer statusId,
     
     return savedDevis;
 }
+
+    public BigDecimal motantDevisTotal(){
+        BigDecimal big = devisRepository.MontantDevisTotal();
+        return big;
+    }
 }
