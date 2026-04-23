@@ -1,0 +1,5 @@
+Tableau de bord :
+Chiffre d'A
+nb cliens
+nb devis 
+statistiquess par status

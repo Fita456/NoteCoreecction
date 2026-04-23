@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,4 +96,69 @@ public class DemandeStatusService {
     public int nombreChangements(int demandeId) {
         return (int) demandeStatusRepository.countByDemandeId(demandeId);
     }
+
+    public DemandeStatus save(int demandeId, int statusId, String commentaire) {
+        Demande demande = demandeRepository.findById(demandeId)
+            .orElseThrow(() -> new RuntimeException("Demande non trouvée"));
+        
+        Status status = statusRepository.findById(statusId)
+            .orElseThrow(() -> new RuntimeException("Status non trouvé"));
+        
+        DemandeStatus ds = new DemandeStatus();
+        ds.setDemande(demande);
+        ds.setStatus(status);
+        ds.setCommentaire(commentaire);
+        ds.setDateStatus(LocalDateTime.now());
+        
+        return demandeStatusRepository.save(ds);
+    }
+
+    public DemandeStatus update(int id, int statusId, String commentaire) {
+        DemandeStatus ds = demandeStatusRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Non trouvé"));
+        
+        Status status = statusRepository.findById(statusId)
+            .orElseThrow(() -> new RuntimeException("Status non trouvé"));
+        
+        ds.setStatus(status);
+        ds.setCommentaire(commentaire);
+        
+        return demandeStatusRepository.save(ds);
+    }
+    
+    public void deleteById(int id) {
+        demandeStatusRepository.deleteById(id);
+    }
+
+    public List<DemandeStatus> findAll() {
+        return demandeStatusRepository.findAll();
+    }
+
+    public List<DemandeStatus> findByDemande(int demandeId) {
+        return demandeStatusRepository.findByDemandeIdOrderByDateStatusDesc(demandeId);
+    }
+
+     public DemandeStatus updateCommentaireEtDate(int id, String commentaire, LocalDateTime dateStatus) {
+        DemandeStatus ds = findById(id);
+        ds.setCommentaire(commentaire);
+        ds.setDateStatus(dateStatus);
+        return demandeStatusRepository.save(ds);
+    }
+
+    public int trouverNombreTousLesStatusCree(){
+        return demandeStatusRepository.trouverNombreTousLesStatusCree();
+    }
+
+    public int trouverNombreTousLesStatusForage(){
+        return demandeStatusRepository.trouverNombreTousLesStatusForage();
+    }
+
+    public int trouverNombreTousLesStatusEtude(){
+        return demandeStatusRepository.trouverNombreTousLesStatusEtude();
+    }
+
+    public List<DemandeStatus> trouverTousLesStatus(String text){
+        return demandeStatusRepository.trouverTousLesStatus(text);
+    }
+
 }

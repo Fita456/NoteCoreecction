@@ -34,7 +34,8 @@ public class Demande {
     @Column(nullable = false)
     private String district;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    // ✅ EAGER = client toujours chargé
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "client_id", nullable = false)
     @NotNull(message = "Le client est obligatoire")
     private Client client;
@@ -45,19 +46,16 @@ public class Demande {
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<DemandeStatus> historiqueStatus = new ArrayList<>();
     
-    // Méthode pour obtenir le dernier statut (sécurisée)
     @Transient
     public DemandeStatus getDernierStatus() {
         if (historiqueStatus == null || historiqueStatus.isEmpty()) {
             return null;
         }
-        // Trier par date décroissante et prendre le premier
         return historiqueStatus.stream()
             .max(Comparator.comparing(DemandeStatus::getDateStatus))
             .orElse(null);
     }
     
-    // Méthode utilitaire pour le libellé du dernier statut
     @Transient
     public String getDernierStatusLibelle() {
         DemandeStatus dernier = getDernierStatus();
