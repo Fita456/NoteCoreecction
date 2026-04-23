@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Modifier le Statut</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-pencil"></i> Modifier le Statut</h2>
+        <a th:href="@{/demande-status}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            
+            <!-- Infos en lecture seule -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <i class="bi bi-lock"></i> Informations (non modifiables)
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        
+                        <!-- Demande -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">Demande</label>
+                            <div class="form-control bg-light">
+                                #<span th:text="${demandeStatus.demande.id}"></span>
+                                - <span th:text="${demandeStatus.demande.lieu}"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Client -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">Client</label>
+                            <div class="form-control bg-light" 
+                                 th:text="${demandeStatus.demande.client.nom}"></div>
+                        </div>
+                        
+                        <!-- District -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">District</label>
+                            <div class="form-control bg-light" 
+                                 th:text="${demandeStatus.demande.district}"></div>
+                        </div>
+                        
+                        <!-- Status -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small">Statut</label>
+                            <div class="form-control bg-light">
+                                <span class="badge bg-info" 
+                                      th:text="${demandeStatus.status.libelle}"></span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Formulaire modification -->
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <i class="bi bi-pencil-square"></i> Champs modifiables
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/demande-status/update}" method="post">
+                        
+                        <input type="hidden" name="demandeStatusId" 
+                               th:value="${demandeStatus.id}">
+                        
+                        <!-- Date modifiable -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-calendar"></i> Date et Heure *
+                            </label>
+                            <input type="datetime-local" name="dateStatus" 
+                                   class="form-control"
+                                   th:value="${#temporals.format(demandeStatus.dateStatus, 'yyyy-MM-dd''T''HH:mm')}"
+                                   required>
+                            <small class="text-muted">Vous pouvez modifier la date et l'heure</small>
+                        </div>
+                        
+                        <!-- Commentaire modifiable -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-chat-text"></i> Commentaire
+                            </label>
+                            <textarea name="commentaire" class="form-control" rows="5"
+                                      placeholder="Ajouter ou modifier le commentaire..."
+                                      th:text="${demandeStatus.commentaire}"></textarea>
+                        </div>
+                        
+                        <!-- Boutons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-check-lg"></i> Sauvegarder
+                            </button>
+                            <a th:href="@{/demande-status}" class="btn btn-secondary">
+                                <i class="bi bi-x"></i> Annuler
+                            </a>
+                        </div>
+                        
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

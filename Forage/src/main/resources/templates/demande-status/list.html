@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Historique des Statuts</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-clock-history"></i> Historique des Statuts</h2>
+        <a th:href="@{/demande-status/new}" class="btn btn-primary">
+            <i class="bi bi-plus"></i> Ajouter un Statut
+        </a>
+        <a th:href="@{/}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th width="60">ID</th>
+                        <th>Demande</th>
+                        <th>Client</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Commentaire</th>
+                        <th width="120">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="ds : ${demandeStatuses}">
+                        <td th:text="${ds.id}"></td>
+                        
+                        <!-- ✅ Accès sécurisé à demande (déjà chargé via JOIN FETCH) -->
+                        <td>
+                            <a th:href="@{/demandes/{id}(id=${ds.demande.id})}"
+                               class="text-decoration-none">
+                                <i class="bi bi-file-text"></i>
+                                #<span th:text="${ds.demande.id}"></span>
+                                - <span th:text="${ds.demande.lieu}"></span>
+                            </a>
+                            <br>
+                            <small class="text-muted" th:text="${ds.demande.district}"></small>
+                        </td>
+                        
+                        <!-- ✅ Accès sécurisé à client (déjà chargé via JOIN FETCH) -->
+                        <td>
+                            <span th:text="${ds.demande.client?.nom}"></span>
+                            <br>
+                            <small class="text-muted" th:text="${ds.demande.client?.contact}"></small>
+                        </td>
+                        
+                        <!-- ✅ Accès sécurisé à status (déjà chargé via JOIN FETCH) -->
+                        <td>
+                            <span class="badge bg-info" th:text="${ds.status.libelle}"></span>
+                        </td>
+                        
+                        <td th:text="${#temporals.format(ds.dateStatus, 'dd/MM/yyyy HH:mm')}"></td>
+                        
+                        <td>
+                            <small th:text="${ds.commentaire != null ? ds.commentaire : '-'}"></small>
+                        </td>
+                        
+                        <td>
+                            <a th:href="@{/demande-status/{id}/edit(id=${ds.id})}"
+                               class="btn btn-sm btn-warning" title="Modifier">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a th:href="@{/demande-status/{id}/delete(id=${ds.id})}"
+                               class="btn btn-sm btn-danger" title="Supprimer"
+                               onclick="return confirm('Supprimer cet historique ?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    
+                    <tr th:if="${#lists.isEmpty(demandeStatuses)}">
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            Aucun historique de statut
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
